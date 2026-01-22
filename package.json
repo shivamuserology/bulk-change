@@ -1,9 +1,9 @@
 {
-  "name": "rippling-bulk-change",
+  "name": "bulk-change",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://shivamuserology.github.io/rippling-bulk-change",
+  "homepage": "https://shivamuserology.github.io/bulk-change",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
