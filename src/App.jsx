@@ -1,0 +1,72 @@
+import React from 'react';
+import { WizardProvider, useWizard, ENTRY_MODES } from './context/WizardContext';
+import ProgressHeader from './components/ProgressHeader';
+import DemoControlPanel from './components/DemoControlPanel';
+import Step1_SelectEmployees from './components/wizard/Step1_SelectEmployees';
+import Step2_ChooseAttributes from './components/wizard/Step2_ChooseAttributes';
+import Step3_SpecifyValues from './components/wizard/Step3_SpecifyValues';
+import Step4_Validation from './components/wizard/Step4_Validation';
+import Step5_ReviewConfirm from './components/wizard/Step5_ReviewConfirm';
+import Step6_Execute from './components/wizard/Step6_Execute';
+import Step7_PostExecution from './components/wizard/Step7_PostExecution';
+import CSVUploadModal from './components/CSVUploadModal';
+import './styles/rippling-tokens.css';
+import './App.css';
+
+function WizardContent() {
+  const { currentStep, entryMode, importCSVComplete } = useWizard();
+  const [showCSVComplete, setShowCSVComplete] = React.useState(false);
+
+  // Show CSV complete modal if entry mode is CSV_COMPLETE
+  React.useEffect(() => {
+    if (entryMode === ENTRY_MODES.CSV_COMPLETE) {
+      setShowCSVComplete(true);
+    }
+  }, [entryMode]);
+
+  const handleCSVComplete = (data) => {
+    importCSVComplete(data);
+    setShowCSVComplete(false);
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1: return <Step1_SelectEmployees />;
+      case 2: return <Step2_ChooseAttributes />;
+      case 3: return <Step3_SpecifyValues />;
+      case 4: return <Step4_Validation />;
+      case 5: return <Step5_ReviewConfirm />;
+      case 6: return <Step6_Execute />;
+      case 7: return <Step7_PostExecution />;
+      default: return <Step1_SelectEmployees />;
+    }
+  };
+
+  return (
+    <div className="app">
+      <ProgressHeader />
+      <main className="main-content">
+        {renderStep()}
+      </main>
+      <DemoControlPanel />
+
+      {showCSVComplete && (
+        <CSVUploadModal
+          type="complete"
+          onClose={() => setShowCSVComplete(false)}
+          onUpload={handleCSVComplete}
+        />
+      )}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <WizardProvider>
+      <WizardContent />
+    </WizardProvider>
+  );
+}
+
+export default App;

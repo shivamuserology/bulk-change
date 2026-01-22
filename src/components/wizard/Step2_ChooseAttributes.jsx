@@ -1,0 +1,234 @@
+import React, { useState, useMemo } from 'react';
+import { useWizard, PERMISSION_SCENARIOS } from '../../context/WizardContext';
+import './Step2.css';
+
+// Templates for common bulk changes
+const TEMPLATES = [
+    {
+        id: 'annual_merit',
+        name: 'Annual Merit Increase',
+        description: 'Compensation, Title, Level changes',
+        fields: ['compensation', 'title', 'targetBonus']
+    },
+    {
+        id: 'promotion',
+        name: 'Promotion Package',
+        description: 'Title, Department, Manager, Compensation',
+        fields: ['title', 'department', 'manager', 'compensation', 'equity']
+    },
+    {
+        id: 'relocation',
+        name: 'Office Relocation',
+        description: 'Work Location, related fields',
+        fields: ['workLocation']
+    }
+];
+
+export default function Step2_ChooseAttributes() {
+    const {
+        fieldSchema,
+        selectedFields,
+        selectField,
+        setSelectedFields,
+        permissionScenario,
+        getFieldPermission,
+        nextStep,
+        prevStep,
+        selectedEmployees
+    } = useWizard();
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [expandedCategories, setExpandedCategories] = useState(
+        fieldSchema.categories.map(c => c.id)
+    );
+
+    const toggleCategory = (categoryId) => {
+        setExpandedCategories(prev =>
+            prev.includes(categoryId)
+                ? prev.filter(id => id !== categoryId)
+                : [...prev, categoryId]
+        );
+    };
+
+    const applyTemplate = (template) => {
+        setSelectedFields(template.fields);
+    };
+
+    // Get permission for display
+    const getPermissionBadge = (field) => {
+        const permission = getFieldPermission(field);
+        if (permission === 'full') return null;
+        if (permission === 'approval_required') return { type: 'warning', label: 'Requires Approval' };
+        if (permission === 'no_access') return { type: 'error', label: 'No Access' };
+        return null;
+    };
+
+    // Filter by search
+    const filteredCategories = useMemo(() => {
+        if (!searchTerm) return fieldSchema.categories;
+
+        return fieldSchema.categories.map(cat => ({
+            ...cat,
+            fields: cat.fields.filter(f =>
+                f.label.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        })).filter(cat => cat.fields.length > 0);
+    }, [fieldSchema, searchTerm]);
+
+    // Count fields by permission
+    const permissionSummary = useMemo(() => {
+        const allFields = fieldSchema.categories.flatMap(c => c.fields);
+        const selected = allFields.filter(f => selectedFields.includes(f.id));
+
+        const full = selected.filter(f => getFieldPermission(f) === 'full').length;
+        const approval = selected.filter(f => getFieldPermission(f) === 'approval_required').length;
+        const blocked = selected.filter(f => getFieldPermission(f) === 'no_access').length;
+
+        return { full, approval, blocked };
+    }, [selectedFields, fieldSchema, getFieldPermission]);
+
+    const hasBlockedFields = permissionSummary.blocked > 0;
+    const needsApproval = permissionSummary.approval > 0;
+
+    return (
+        <div className="step-container animate-fade-in">
+            <div className="step-header">
+                <div>
+                    <h2>Choose Attributes</h2>
+                    <p className="step-description">
+                        Select which fields to update for {selectedEmployees.length} employees
+                    </p>
+                </div>
+            </div>
+
+            {/* Templates */}
+            <div className="templates-section">
+                <h4>Quick Templates</h4>
+                <div className="templates-grid">
+                    {TEMPLATES.map(template => (
+                        <button
+                            key={template.id}
+                            className="template-card"
+                            onClick={() => applyTemplate(template)}
+                        >
+                            <span className="template-name">{template.name}</span>
+                            <span className="template-desc">{template.description}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Permission Summary */}
+            {selectedFields.length > 0 && (
+                <div className="permission-summary">
+                    {permissionSummary.full > 0 && (
+                        <span className="perm-badge perm-full">
+                            ✓ {permissionSummary.full} editable
+                        </span>
+                    )}
+                    {permissionSummary.approval > 0 && (
+                        <span className="perm-badge perm-approval">
+                            ⏳ {permissionSummary.approval} need approval
+                        </span>
+                    )}
+                    {permissionSummary.blocked > 0 && (
+                        <span className="perm-badge perm-blocked">
+                            🚫 {permissionSummary.blocked} blocked
+                        </span>
+                    )}
+                </div>
+            )}
+
+            {/* Search */}
+            <div className="field-search">
+                <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Search fields..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {/* Field Browser */}
+            <div className="field-browser">
+                {filteredCategories.map(category => (
+                    <div key={category.id} className="field-category">
+                        <button
+                            className="category-header"
+                            onClick={() => toggleCategory(category.id)}
+                        >
+                            <span className="category-toggle">
+                                {expandedCategories.includes(category.id) ? '▼' : '▶'}
+                            </span>
+                            <span className="category-name">{category.name}</span>
+                            <span className="category-count">
+                                {category.fields.filter(f => selectedFields.includes(f.id)).length} / {category.fields.length}
+                            </span>
+                        </button>
+
+                        {expandedCategories.includes(category.id) && (
+                            <div className="category-fields">
+                                {category.fields.map(field => {
+                                    const permission = getFieldPermission(field);
+                                    const permBadge = getPermissionBadge(field);
+                                    const isDisabled = permission === 'no_access';
+                                    const isSelected = selectedFields.includes(field.id);
+
+                                    return (
+                                        <label
+                                            key={field.id}
+                                            className={`field-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox"
+                                                checked={isSelected}
+                                                disabled={isDisabled}
+                                                onChange={() => !isDisabled && selectField(field.id)}
+                                            />
+                                            <span className="field-label">{field.label}</span>
+                                            {field.readOnly && (
+                                                <span className="badge badge-plum">Read-only</span>
+                                            )}
+                                            {permBadge && (
+                                                <span className={`badge badge-${permBadge.type === 'warning' ? 'warning' : 'error'}`}>
+                                                    {permBadge.label}
+                                                </span>
+                                            )}
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {hasBlockedFields && (
+                <div className="alert alert-error">
+                    <strong>Access Denied:</strong> You cannot modify some selected fields. They will be skipped.
+                </div>
+            )}
+
+            {needsApproval && !hasBlockedFields && (
+                <div className="alert alert-warning">
+                    <strong>Approval Required:</strong> {permissionSummary.approval} field(s) will require approval before changes are applied.
+                </div>
+            )}
+
+            <div className="step-footer">
+                <button className="btn btn-secondary" onClick={prevStep}>
+                    ← Back
+                </button>
+                <button
+                    className="btn btn-primary btn-lg"
+                    disabled={selectedFields.length === 0}
+                    onClick={nextStep}
+                >
+                    Continue with {selectedFields.length} field{selectedFields.length !== 1 ? 's' : ''} →
+                </button>
+            </div>
+        </div>
+    );
+}

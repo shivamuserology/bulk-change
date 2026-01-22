@@ -1,0 +1,86 @@
+{
+  "categories": [
+    {
+      "id": "employment",
+      "name": "Employment Information",
+      "fields": [
+        { "id": "title", "label": "Title", "type": "text", "defaultPermission": "full" },
+        { "id": "department", "label": "Department", "type": "dropdown", "options": ["Engineering", "Sales", "Marketing", "HR", "Finance", "Product", "Customer Support", "Operations"], "defaultPermission": "full" },
+        { "id": "team", "label": "Team", "type": "dropdown", "options": ["Core", "Platform", "Growth", "Enterprise", "SMB", "Infrastructure"], "defaultPermission": "full" },
+        { "id": "compensation", "label": "Compensation", "type": "currency", "defaultPermission": "approval_required" },
+        { "id": "compensationPer", "label": "Per", "type": "dropdown", "options": ["Hour", "Year"], "defaultPermission": "full" },
+        { "id": "targetBonus", "label": "Target Annual Bonus", "type": "currency", "defaultPermission": "full" },
+        { "id": "equity", "label": "Equity - Number of Shares", "type": "number", "defaultPermission": "approval_required" },
+        { "id": "workEmail", "label": "Work Email", "type": "email", "defaultPermission": "full" },
+        { "id": "manager", "label": "Manager", "type": "employee_reference", "defaultPermission": "full" },
+        { "id": "workLocation", "label": "Work Location", "type": "dropdown", "options": ["San Francisco", "New York", "Austin", "Seattle", "London", "Remote"], "defaultPermission": "full" }
+      ]
+    },
+    {
+      "id": "personal",
+      "name": "Personal Information",
+      "fields": [
+        { "id": "legalFirstName", "label": "Legal First Name", "type": "text", "defaultPermission": "full" },
+        { "id": "legalLastName", "label": "Legal Last Name", "type": "text", "defaultPermission": "full" },
+        { "id": "preferredName", "label": "Preferred Name", "type": "text", "defaultPermission": "full" },
+        { "id": "dateOfBirth", "label": "Date of Birth", "type": "date", "defaultPermission": "no_access" },
+        { "id": "homeAddressLine1", "label": "Home Address Line 1", "type": "text", "defaultPermission": "full" },
+        { "id": "homeAddressLine2", "label": "Home Address Line 2", "type": "text", "defaultPermission": "full" },
+        { "id": "homeCity", "label": "City", "type": "text", "defaultPermission": "full" },
+        { "id": "homeState", "label": "State", "type": "text", "defaultPermission": "full" },
+        { "id": "homeZip", "label": "ZIP", "type": "text", "defaultPermission": "full" },
+        { "id": "homeCountry", "label": "Country", "type": "dropdown", "options": ["United States", "Canada", "United Kingdom", "Germany", "India"], "defaultPermission": "full" },
+        { "id": "personalEmail", "label": "Personal Email", "type": "email", "defaultPermission": "full" },
+        { "id": "personalPhone", "label": "Personal Phone", "type": "phone", "defaultPermission": "full" }
+      ]
+    },
+    {
+      "id": "additional",
+      "name": "Additional Information",
+      "fields": [
+        { "id": "emergencyContactName", "label": "Emergency Contact Name", "type": "text", "defaultPermission": "full" },
+        { "id": "emergencyContactRelationship", "label": "Emergency Contact Relationship", "type": "dropdown", "options": ["Spouse", "Parent", "Sibling", "Friend", "Other"], "defaultPermission": "full" },
+        { "id": "emergencyContactPhone", "label": "Emergency Contact Phone", "type": "phone", "defaultPermission": "full" },
+        { "id": "employeeId", "label": "Employee ID", "type": "text", "defaultPermission": "no_access", "readOnly": true },
+        { "id": "nationalId", "label": "National ID (SSN)", "type": "text", "defaultPermission": "no_access" },
+        { "id": "workAuthorization", "label": "Work Authorization", "type": "dropdown", "options": ["Citizen", "Permanent Resident", "H1B", "L1", "F1-OPT", "Other"], "defaultPermission": "approval_required" },
+        { "id": "citizenship", "label": "Citizenship", "type": "dropdown", "options": ["United States", "Canada", "United Kingdom", "Germany", "India", "Other"], "defaultPermission": "full" }
+      ]
+    },
+    {
+      "id": "directReports",
+      "name": "Direct Reports",
+      "fields": [
+        { "id": "directReports", "label": "Direct Reports", "type": "employee_list", "defaultPermission": "full", "readOnly": true }
+      ]
+    },
+    {
+      "id": "documents",
+      "name": "Documents",
+      "fields": [
+        { "id": "documents", "label": "Documents", "type": "document_list", "defaultPermission": "full", "readOnly": true }
+      ]
+    },
+    {
+      "id": "integratedApps",
+      "name": "Integrated Apps",
+      "fields": [
+        { "id": "slackStatus", "label": "Slack Status", "type": "dropdown", "options": ["Active", "Suspended", "Pending"], "defaultPermission": "full" },
+        { "id": "slackEmail", "label": "Slack Email", "type": "email", "defaultPermission": "full" },
+        { "id": "googleWorkspaceStatus", "label": "Google Workspace Status", "type": "dropdown", "options": ["Active", "Suspended", "Pending"], "defaultPermission": "full" },
+        { "id": "googleWorkspaceEmail", "label": "Google Workspace Email", "type": "email", "defaultPermission": "full" },
+        { "id": "githubStatus", "label": "GitHub Status", "type": "dropdown", "options": ["Active", "Suspended", "Pending"], "defaultPermission": "full" },
+        { "id": "githubUsername", "label": "GitHub Username", "type": "text", "defaultPermission": "full" }
+      ]
+    },
+    {
+      "id": "twoFactor",
+      "name": "Two Factor Devices",
+      "fields": [
+        { "id": "twoFactorMethod", "label": "2FA Method", "type": "dropdown", "options": ["Authenticator App", "SMS", "Hardware Key", "None"], "defaultPermission": "full" },
+        { "id": "twoFactorDeviceLabel", "label": "Device Label", "type": "text", "defaultPermission": "full" },
+        { "id": "twoFactorStatus", "label": "2FA Status", "type": "dropdown", "options": ["Active", "Removed", "Pending Setup"], "defaultPermission": "full" }
+      ]
+    }
+  ]
+}
