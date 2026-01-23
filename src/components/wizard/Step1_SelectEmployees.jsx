@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useWizard, ENTRY_MODES } from '../../context/WizardContext';
-import CSVUploadModal from '../CSVUploadModal';
 import ColumnCustomizer, { DEFAULT_COLUMNS, getColumnConfig } from '../ColumnCustomizer';
 import './Step1.css';
 
@@ -8,227 +7,238 @@ export default function Step1_SelectEmployees() {
     const {
         employees,
         selectedEmployees,
-        selectEmployee,
-        selectAllEmployees,
-        clearEmployees,
-        nextStep,
+        setSelectedEmployees,
+        setCurrentStep,
         entryMode,
-        importCSVEmployees
+        setEntryMode,
+        setImportCSVComplete
     } = useWizard();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
         department: '',
-        location: '',
-        status: ''
+        status: '',
+        workLocation: ''
     });
-    const [showCSVModal, setShowCSVModal] = useState(entryMode === ENTRY_MODES.CSV_EMPLOYEE_LIST);
-    const [csvResult, setCsvResult] = useState(null);
-    const [showColumnCustomizer, setShowColumnCustomizer] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState(DEFAULT_COLUMNS);
-    const [filtersVisible, setFiltersVisible] = useState(false);
+    const [showColumnCustomizer, setShowColumnCustomizer] = useState(false);
+    const [activeTab, setActiveTab] = useState('employees');
 
     // Get unique values for filters
-    const departments = useMemo(() => [...new Set(employees.map(e => e.department))], [employees]);
-    const locations = useMemo(() => [...new Set(employees.map(e => e.workLocation))], [employees]);
-    const statuses = useMemo(() => [...new Set(employees.map(e => e.status))], [employees]);
+    const filterOptions = useMemo(() => ({
+        departments: [...new Set(employees.map(e => e.department))].sort(),
+        statuses: [...new Set(employees.map(e => e.status))].sort(),
+        locations: [...new Set(employees.map(e => e.workLocation))].sort()
+    }), [employees]);
 
     // Filter employees
     const filteredEmployees = useMemo(() => {
         return employees.filter(emp => {
-            const searchMatch = !searchTerm ||
-                `${emp.legalFirstName} ${emp.legalLastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                emp.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                emp.workEmail.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = !searchTerm ||
+                emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                emp.workEmail?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            if (!searchMatch) return false;
+            const matchesDepartment = !filters.department || emp.department === filters.department;
+            const matchesStatus = !filters.status || emp.status === filters.status;
+            const matchesLocation = !filters.workLocation || emp.workLocation === filters.workLocation;
 
-            if (!filtersVisible) return true;
-
-            const conditions = [];
-            if (filters.department) conditions.push(emp.department === filters.department);
-            if (filters.location) conditions.push(emp.workLocation === filters.location);
-            if (filters.status) conditions.push(emp.status === filters.status);
-
-            return conditions.length === 0 || conditions.every(c => c);
+            return matchesSearch && matchesDepartment && matchesStatus && matchesLocation;
         });
-    }, [employees, searchTerm, filters, filtersVisible]);
+    }, [employees, searchTerm, filters]);
 
-    const allFilteredSelected = filteredEmployees.length > 0 &&
-        filteredEmployees.every(e => selectedEmployees.includes(e.id));
-
-    const handleSelectAll = () => {
-        if (allFilteredSelected) {
-            const filteredIds = filteredEmployees.map(e => e.id);
-            selectAllEmployees(selectedEmployees.filter(id => !filteredIds.includes(id)));
+    // Selection handlers
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedEmployees(filteredEmployees.map(emp => emp.id));
         } else {
-            const newIds = [...new Set([...selectedEmployees, ...filteredEmployees.map(e => e.id)])];
-            selectAllEmployees(newIds);
+            setSelectedEmployees([]);
         }
     };
 
-    const handleCSVUpload = (employeeIds) => {
-        const result = importCSVEmployees(employeeIds);
-        setCsvResult(result);
-        setShowCSVModal(false);
+    const handleSelectEmployee = (employeeId) => {
+        setSelectedEmployees(prev =>
+            prev.includes(employeeId)
+                ? prev.filter(id => id !== employeeId)
+                : [...prev, employeeId]
+        );
     };
 
-    // Format cell value
-    const formatCellValue = (emp, colConfig) => {
-        const value = emp[colConfig.field];
-        if (value === undefined || value === null) return '—';
+    const isAllSelected = filteredEmployees.length > 0 &&
+        filteredEmployees.every(emp => selectedEmployees.includes(emp.id));
 
-        switch (colConfig.format) {
-            case 'currency':
-                return typeof value === 'number' ? `$${value.toLocaleString()}` : value;
-            case 'date':
-                return value ? new Date(value).toLocaleDateString() : '—';
-            case 'badge':
-                return (
-                    <span className={`badge ${value === 'Active' ? 'badge-success' : 'badge-warning'}`}>
-                        {value}
-                    </span>
-                );
-            default:
-                return value;
+    const handleBulkChange = () => {
+        if (selectedEmployees.length > 0) {
+            setCurrentStep(2);
         }
     };
 
+    const handleExportCSV = () => {
+        const headers = ['Name', 'Email', 'Department', 'Title', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...filteredEmployees.map(emp =>
+                [emp.name, emp.workEmail, emp.department, emp.title, emp.status].join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'employees.csv';
+        a.click();
+    };
+
+    const handleImportData = () => {
+        setEntryMode(ENTRY_MODES.CSV_COMPLETE);
+        setImportCSVComplete(false);
+    };
+
+    // Get active columns config
     const activeColumns = visibleColumns
         .map(colId => getColumnConfig(colId))
         .filter(Boolean);
 
+    const renderCellValue = (employee, column) => {
+        const value = employee[column.field];
+        if (!value) return '-';
+
+        if (column.format === 'currency') {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+        }
+        if (column.format === 'date') {
+            return new Date(value).toLocaleDateString();
+        }
+        if (column.format === 'badge') {
+            return <span className={`status-badge status-${value.toLowerCase()}`}>{value}</span>;
+        }
+        return value;
+    };
+
     return (
-        <div className="dashboard-view animate-fade-in">
-            {/* Header Section */}
-            <div className="dashboard-header">
-                <div className="tabs-container">
-                    <button className="dashboard-tab active">Employees</button>
-                    <button className="dashboard-tab">Action Log</button>
-                </div>
-
-                <div className="dashboard-controls">
-                    <div className="page-header">
-                        <h2>Employees</h2>
-                        <span className="employee-count-badge">
-                            Showing {filteredEmployees.length} of {employees.length}
-                        </span>
-                    </div>
-
-                    <div className="action-toolbar">
-                        <div className="search-field-container">
-                            <span className="search-icon">🔍</span>
-                            <input
-                                type="text"
-                                placeholder="Search employees..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-
-                        <button
-                            className={`icon-btn filter-btn ${filtersVisible ? 'active' : ''}`}
-                            onClick={() => setFiltersVisible(!filtersVisible)}
-                            title="Filter"
-                        >
-                            <span className="icon">T</span>
-                        </button>
-
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            title="Export CSV"
-                        >
-                            Export CSV
-                        </button>
-
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => setShowCSVModal(true)}
-                        >
-                            Import Employee Data
-                        </button>
-
-                        <button
-                            className="icon-btn customize-btn"
-                            onClick={() => setShowColumnCustomizer(true)}
-                            title="Attributes"
-                        >
-                            <span className="icon">⚙</span>
-                        </button>
-                    </div>
-                </div>
-
-                {filtersVisible && (
-                    <div className="active-filters-bar animate-slide-up">
-                        <select
-                            className="form-input form-select"
-                            value={filters.department}
-                            onChange={(e) => setFilters(f => ({ ...f, department: e.target.value }))}
-                        >
-                            <option value="">All Departments</option>
-                            {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-
-                        <select
-                            className="form-input form-select"
-                            value={filters.location}
-                            onChange={(e) => setFilters(f => ({ ...f, location: e.target.value }))}
-                        >
-                            <option value="">All Locations</option>
-                            {locations.map(l => <option key={l} value={l}>{l}</option>)}
-                        </select>
-
-                        <select
-                            className="form-input form-select"
-                            value={filters.status}
-                            onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
-                        >
-                            <option value="">All Statuses</option>
-                            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-                )}
+        <div className="dashboard-view">
+            {/* Tabs */}
+            <div className="tabs-container">
+                <button
+                    className={`dashboard-tab ${activeTab === 'employees' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('employees')}
+                >
+                    Employees
+                </button>
+                <button
+                    className={`dashboard-tab ${activeTab === 'changelog' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('changelog')}
+                >
+                    Change Log
+                </button>
             </div>
 
-            {csvResult && (
-                <div className={`alert ${csvResult.invalid > 0 ? 'alert-warning' : 'alert-success'}`}>
-                    <span>
-                        ✓ Imported {csvResult.valid} employees
-                        {csvResult.invalid > 0 && ` (${csvResult.invalid} not found)`}
-                    </span>
+            {/* Header Row - Matching Rippling Design */}
+            <div className="dashboard-header-row">
+                <div className="header-title">
+                    <span className="header-title-text">Employees</span>
+                    <span className="header-title-separator">·</span>
+                    <span className="header-title-count">Showing {filteredEmployees.length} of {employees.length}</span>
+                </div>
+                <div className="header-actions">
+                    <div className="search-box">
+                        <svg className="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="M21 21l-4.35-4.35" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Employee or designated approver"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        className={`filter-btn ${showFilters ? 'active' : ''}`}
+                        onClick={() => setShowFilters(!showFilters)}
+                        title="Filter"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                    </button>
+                    <button className="action-btn" onClick={handleExportCSV}>
+                        Export CSV
+                    </button>
+                    <button className="action-btn primary" onClick={handleImportData}>
+                        Import Employee Data
+                    </button>
+                    <button
+                        className="icon-btn customize-btn"
+                        onClick={() => setShowColumnCustomizer(true)}
+                        title="Attributes"
+                    >
+                        ⚙️
+                    </button>
+                </div>
+            </div>
+
+            {/* Active Filters */}
+            {showFilters && (
+                <div className="filters-row">
+                    <select
+                        value={filters.department}
+                        onChange={(e) => setFilters(f => ({ ...f, department: e.target.value }))}
+                    >
+                        <option value="">All Departments</option>
+                        {filterOptions.departments.map(d => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={filters.status}
+                        onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
+                    >
+                        <option value="">All Statuses</option>
+                        {filterOptions.statuses.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={filters.workLocation}
+                        onChange={(e) => setFilters(f => ({ ...f, workLocation: e.target.value }))}
+                    >
+                        <option value="">All Locations</option>
+                        {filterOptions.locations.map(l => (
+                            <option key={l} value={l}>{l}</option>
+                        ))}
+                    </select>
                 </div>
             )}
 
+            {/* Employee Table */}
             <div className="dashboard-content">
-                <div className="bulk-actions-bar">
-                    {selectedEmployees.length > 0 ? (
-                        <div className="selection-active-state animate-fade-in">
-                            <span className="selection-count">
-                                {selectedEmployees.length} selected
-                            </span>
+                {/* Bulk Actions Bar */}
+                {selectedEmployees.length > 0 && (
+                    <div className="bulk-actions-bar">
+                        <div className="selection-active-state">
+                            <span>{selectedEmployees.length} employee{selectedEmployees.length !== 1 ? 's' : ''} selected</span>
                             <div className="selection-actions">
-                                <button className="btn btn-primary btn-sm" onClick={nextStep}>
-                                    Bulk Change →
-                                </button>
-                                <button className="btn btn-ghost btn-sm" onClick={clearEmployees}>
+                                <button className="btn btn-ghost" onClick={() => setSelectedEmployees([])}>
                                     Clear
+                                </button>
+                                <button className="btn btn-primary" onClick={handleBulkChange}>
+                                    Bulk Change →
                                 </button>
                             </div>
                         </div>
-                    ) : (
-                        <div className="placeholder-height"></div>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                <div className="table-container">
-                    <table className="table dashboard-table">
+                <div className="table-wrapper">
+                    <table className="data-table dashboard-table">
                         <thead>
                             <tr>
-                                <th style={{ width: 40 }}>
+                                <th style={{ width: '40px' }}>
                                     <input
                                         type="checkbox"
-                                        className="checkbox"
-                                        checked={allFilteredSelected}
+                                        checked={isAllSelected}
                                         onChange={handleSelectAll}
                                     />
                                 </th>
@@ -239,63 +249,40 @@ export default function Step1_SelectEmployees() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredEmployees.map(emp => (
+                            {filteredEmployees.map(employee => (
                                 <tr
-                                    key={emp.id}
-                                    className={selectedEmployees.includes(emp.id) ? 'selected' : ''}
-                                    onClick={() => selectEmployee(emp.id)}
+                                    key={employee.id}
+                                    className={selectedEmployees.includes(employee.id) ? 'selected' : ''}
                                 >
-                                    <td onClick={(e) => e.stopPropagation()}>
+                                    <td>
                                         <input
                                             type="checkbox"
-                                            className="checkbox"
-                                            checked={selectedEmployees.includes(emp.id)}
-                                            onChange={() => selectEmployee(emp.id)}
+                                            checked={selectedEmployees.includes(employee.id)}
+                                            onChange={() => handleSelectEmployee(employee.id)}
                                         />
                                     </td>
                                     <td>
                                         <div className="employee-cell">
                                             <div className="employee-avatar">
-                                                {emp.legalFirstName[0]}{emp.legalLastName[0]}
+                                                {employee.name.split(' ').map(n => n[0]).join('')}
                                             </div>
                                             <div>
-                                                <div className="employee-name">
-                                                    {emp.legalFirstName} {emp.legalLastName}
-                                                </div>
-                                                <div className="employee-email">{emp.workEmail}</div>
+                                                <div className="employee-name">{employee.name}</div>
+                                                <div className="employee-email">{employee.workEmail}</div>
                                             </div>
                                         </div>
                                     </td>
                                     {activeColumns.map(col => (
-                                        <td key={col.id}>{formatCellValue(emp, col)}</td>
+                                        <td key={col.id}>{renderCellValue(employee, col)}</td>
                                     ))}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-
-                {filteredEmployees.length === 0 && (
-                    <div className="empty-state">
-                        <p>No employees match your filters</p>
-                        <button className="btn btn-secondary" onClick={() => {
-                            setSearchTerm('');
-                            setFilters({ department: '', location: '', status: '' });
-                        }}>
-                            Clear filters
-                        </button>
-                    </div>
-                )}
             </div>
 
-            {showCSVModal && (
-                <CSVUploadModal
-                    type="employee_list"
-                    onClose={() => setShowCSVModal(false)}
-                    onUpload={handleCSVUpload}
-                />
-            )}
-
+            {/* Column Customizer Modal */}
             {showColumnCustomizer && (
                 <ColumnCustomizer
                     selectedColumns={visibleColumns}
