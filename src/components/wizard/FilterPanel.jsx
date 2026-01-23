@@ -1,46 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
+import CascadingMenu from '../common/CascadingMenu';
 import './Step1.css'; // We'll share styles or create a new one if needed, keeping it simpler for now
 
 const FilterPanel = ({ isOpen, onClose, filters, onFilterChange, schema, employeeData }) => {
-    // Helper to calculate available counts for options
-    const getOptionCounts = (fieldId) => {
-        const counts = {};
-        employeeData.forEach(emp => {
-            const val = emp[fieldId];
-            if (val) {
-                counts[val] = (counts[val] || 0) + 1;
-            }
-        });
-        return counts;
-    };
-
-    const handleCheckboxChange = (fieldId, value) => {
-        const currentValues = filters[fieldId] || [];
-        let newValues;
-
-        if (currentValues.includes(value)) {
-            newValues = currentValues.filter(v => v !== value);
-        } else {
-            newValues = [...currentValues, value];
-        }
-
-        onFilterChange(fieldId, newValues);
-    };
-
-    const clearAll = () => {
-        // Pass empty object or reset all keys
-        // We'll reset by passing a special signal or just iterating
-        // Ideally the parent handles 'reset'
-        // For now, we'll iterate known keys? Or let parent handle "clear"
-        // Let's assume onFilterChange handles null to clear, or we emit a clear event.
-        // Actually, let's just emit empty arrays for everything or let parent handle "setFilters({})"
-        // We'll define a clear prop or just use onFilterChange for each key?
-        // Better: let parent expose a clearAll function.
-        // For MVP here, let's assume we pass { } to parent if supported, or loop.
-        // I'll stick to 'onFilterReset' prop.
-    };
-
     if (!isOpen) return null;
+
+    const handleMenuSelect = (taskId, type, value) => {
+        if (type === 'value') {
+            // Value is the new array of selected values
+            onFilterChange(taskId, value);
+        }
+    };
 
     return (
         <div className="filter-panel animate-slide-right">
@@ -56,42 +26,14 @@ const FilterPanel = ({ isOpen, onClose, filters, onFilterChange, schema, employe
                     </button>
                 </div>
             </div>
-
-            <div className="filter-panel-content">
-                {schema.categories.map(category => (
-                    <div key={category.id} className="filter-category">
-                        <div className="category-title">{category.name}</div>
-                        <div className="category-fields">
-                            {category.fields.map(field => {
-                                // Only show filterable fields (e.g. dropdowns, or maybe everything?)
-                                // For MVP, let's focus on 'dropdown' types as they are easiest to facet.
-                                // The user request implies filtering on attributes within these categories.
-                                if (field.type !== 'dropdown') return null;
-
-                                const counts = getOptionCounts(field.id);
-
-                                return (
-                                    <div key={field.id} className="filter-field-group">
-                                        <div className="field-label">{field.label}</div>
-                                        <div className="option-list">
-                                            {field.options?.map(option => (
-                                                <label key={option} className="checkbox-item">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={(filters[field.id] || []).includes(option)}
-                                                        onChange={() => handleCheckboxChange(field.id, option)}
-                                                    />
-                                                    <span className="checkbox-label">{option}</span>
-                                                    <span className="count-badge">{counts[option] || 0}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
+            <div className="filter-panel-content" style={{ padding: 0, overflow: 'hidden' }}>
+                <CascadingMenu
+                    mode="filter"
+                    schema={schema}
+                    selectedItems={filters}
+                    onSelect={handleMenuSelect}
+                    employeeData={employeeData}
+                />
             </div>
         </div>
     );

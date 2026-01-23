@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import CascadingMenu from '../common/CascadingMenu';
 import { useWizard, PERMISSION_SCENARIOS } from '../../context/WizardContext';
 import './Step2.css';
 
@@ -150,59 +151,26 @@ export default function Step2_ChooseAttributes() {
                 />
             </div>
 
-            {/* Field Browser */}
-            <div className="field-browser">
-                {filteredCategories.map(category => (
-                    <div key={category.id} className="field-category">
-                        <button
-                            className="category-header"
-                            onClick={() => toggleCategory(category.id)}
-                        >
-                            <span className="category-toggle">
-                                {expandedCategories.includes(category.id) ? '▼' : '▶'}
-                            </span>
-                            <span className="category-name">{category.name}</span>
-                            <span className="category-count">
-                                {category.fields.filter(f => selectedFields.includes(f.id)).length} / {category.fields.length}
-                            </span>
-                        </button>
-
-                        {expandedCategories.includes(category.id) && (
-                            <div className="category-fields">
-                                {category.fields.map(field => {
-                                    const permission = getFieldPermission(field);
-                                    const permBadge = getPermissionBadge(field);
-                                    const isDisabled = permission === 'no_access';
-                                    const isSelected = selectedFields.includes(field.id);
-
-                                    return (
-                                        <label
-                                            key={field.id}
-                                            className={`field-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox"
-                                                checked={isSelected}
-                                                disabled={isDisabled}
-                                                onChange={() => !isDisabled && selectField(field.id)}
-                                            />
-                                            <span className="field-label">{field.label}</span>
-                                            {field.readOnly && (
-                                                <span className="badge badge-plum">Read-only</span>
-                                            )}
-                                            {permBadge && (
-                                                <span className={`badge badge-${permBadge.type === 'warning' ? 'warning' : 'error'}`}>
-                                                    {permBadge.label}
-                                                </span>
-                                            )}
-                                        </label>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                ))}
+            {/* Field Browser (Cascading Menu) */}
+            <div className="field-browser" style={{ padding: 0, height: '400px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                <CascadingMenu
+                    mode="selection"
+                    schema={{
+                        ...fieldSchema,
+                        categories: filteredCategories
+                    }}
+                    selectedItems={selectedFields}
+                    onSelect={(itemId, type) => {
+                        if (type === 'field') {
+                            // Check permission
+                            const field = fieldSchema.categories.flatMap(c => c.fields).find(f => f.id === itemId);
+                            const permission = getFieldPermission(field);
+                            if (permission !== 'no_access') {
+                                selectField(itemId);
+                            }
+                        }
+                    }}
+                />
             </div>
 
             {hasBlockedFields && (
