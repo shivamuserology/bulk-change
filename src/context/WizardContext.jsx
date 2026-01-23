@@ -271,6 +271,32 @@ export function WizardProvider({ children }) {
         }));
     }, []);
 
+    const revertLogEntry = useCallback((logId) => {
+        setState(prev => {
+            const entryToRevert = prev.actionLog.find(l => l.id === logId);
+            if (!entryToRevert || entryToRevert.status === 'reverted') return prev;
+
+            const newLog = prev.actionLog.map(l =>
+                l.id === logId ? { ...l, status: 'reverted' } : l
+            );
+
+            return {
+                ...prev,
+                actionLog: [
+                    {
+                        id: `revert_${Date.now()}`,
+                        timestamp: new Date().toISOString(),
+                        status: 'success',
+                        type: 'reversal',
+                        summary: `Reverted: ${entryToRevert.summary}`,
+                        details: { revertedLogId: logId }
+                    },
+                    ...newLog
+                ]
+            };
+        });
+    }, []);
+
     // Effective date
     const setEffectiveDate = useCallback((dateType, customDate = null) => {
         setState(prev => ({
@@ -560,32 +586,7 @@ export function WizardProvider({ children }) {
 
         // Action Log
         addActionLogEntry,
-
-        revertAction: useCallback((logId) => {
-            setState(prev => {
-                const logEntry = prev.actionLog.find(l => l.id === logId);
-                if (!logEntry || logEntry.status === 'reverted') return prev;
-
-                const newLog = prev.actionLog.map(l =>
-                    l.id === logId ? { ...l, status: 'reverted' } : l
-                );
-
-                return {
-                    ...prev,
-                    actionLog: [
-                        {
-                            id: `log_revert_${Date.now()}`,
-                            timestamp: new Date().toISOString(),
-                            status: 'success',
-                            type: 'revert',
-                            summary: `Reverted: ${logEntry.summary}`,
-                            details: { revertedLogId: logId }
-                        },
-                        ...newLog
-                    ]
-                };
-            });
-        }, [])
+        revertLogEntry
     };
 
     return (

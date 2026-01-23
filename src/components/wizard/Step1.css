@@ -544,141 +544,207 @@
     margin-right: 8px;
 }
 
-.actions-cell {
-    text-align: right;
+.log-entry-wrapper.is-reverted {
+    opacity: 0.6;
+    background: #f9fafb;
 }
 
-/* Revert Button and Comparison View */
-.btn-revert-sm {
-    background: #fef2f2;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-left: var(--spacing-md);
-    transition: all 0.2s ease;
-}
-
-.btn-revert-sm:hover {
-    background: #ef4444;
-    color: white;
-}
-
-.status-pill.reverted {
+.log-meta .status-pill.reverted {
     color: var(--text-muted);
-    font-style: italic;
 }
 
-.type-pill.revert {
-    background: #fef2f2;
-    color: #ef4444;
-}
-
-/* Rich Log Details */
-.detail-box.wide {
-    grid-column: span 2;
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.impact-stats-mini {
-    display: flex;
-    gap: 24px;
-    margin-top: 4px;
-}
-
-.mini-stat {
-    font-size: 14px;
-    color: var(--plum-deep);
-}
-
-.sync-status-row {
-    display: flex;
-    gap: 16px;
-    margin-top: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #10b981;
-}
-
-/* Comparison Card */
-.comparison-card {
-    grid-column: span 2;
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--white);
-    max-width: 500px;
-}
-
-.comp-header {
-    background: #f8fafc;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border-light);
+.details-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.comp-emp {
+.details-header h5 {
+    margin: 0;
+    font-size: 13px;
     font-weight: 700;
+}
+
+.btn-xs {
+    padding: 2px 8px;
+    font-size: 10px;
+    height: auto;
+}
+
+.btn-danger {
+    color: #ef4444;
+}
+
+.btn-danger:hover {
+    background: #fef2f2;
+}
+
+.detail-box.full-width {
+    grid-column: 1 / -1;
+}
+
+.mod-table-wrapper {
+    margin-top: 8px;
+    border: 1px solid #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.mod-detail-table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 12px;
 }
 
-.comp-field {
+.mod-detail-table th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
     color: var(--text-muted);
-    font-size: 11px;
-    text-transform: uppercase;
 }
 
-.comp-body {
-    padding: 16px;
+.mod-detail-table td {
+    padding: 10px 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.mod-detail-table td.field-cell {
+    font-weight: 600;
+    color: var(--plum-deep);
+    width: 150px;
+}
+
+.mod-detail-table td.logic-cell {
+    color: var(--text-secondary);
+}
+
+.date-badge {
+    background: #fffbeb;
+    color: #92400e;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.scope-summary .count {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--plum-deep);
+}
+
+/* Side-by-Side Comparison */
+.side-by-side-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: var(--white);
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+}
+
+.comparison-emp-info {
     display: flex;
     align-items: center;
-    justify-content: space-around;
     gap: 12px;
 }
 
-.comp-side {
+.comparison-emp-info .avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--plum-light);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.comparison-emp-info .id {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.comparison-visual {
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.comp-field {
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.comp-field .label {
+    color: var(--text-muted);
+    margin-right: 4px;
+}
+
+.comp-field .value {
+    font-weight: 600;
+    color: var(--plum-deep);
+}
+
+.comp-flow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.comp-box {
     flex: 1;
+    background: #f8fafc;
+    padding: 8px;
+    border-radius: 6px;
     text-align: center;
 }
 
-.comp-side label {
+.comp-box label {
     display: block;
     font-size: 9px;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
-.comp-side span {
-    font-size: 16px;
+.comp-box span {
+    font-size: 13px;
     font-weight: 600;
 }
 
-.comp-side.old span {
-    color: var(--text-secondary);
-    text-decoration: line-through;
-    opacity: 0.6;
+.comp-box.old {
+    border: 1px solid #e2e8f0;
 }
 
-.comp-side.new span {
+.comp-box.new {
+    background: #fdf2ff;
+    border: 1px solid var(--plum-light);
     color: var(--plum-deep);
 }
 
 .comp-arrow {
-    font-size: 20px;
-    color: var(--border-color);
+    color: var(--text-muted);
+    font-weight: bold;
 }
 
-.log-entry-wrapper.is-expanded .log-icon-circle {
-    background: var(--plum-light);
-    color: white;
+.revert-info {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
 }
+
+.actions-cell {
+    text-align: right;
+    padding-right: var(--spacing-lg) !important;
+}
+
 
 @keyframes slideDownActionLog {
     from {

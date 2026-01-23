@@ -19,7 +19,8 @@ export default function Step1_SelectEmployees() {
         filters,
         setFilters,
         actionLog,
-        addActionLogEntry
+        addActionLogEntry,
+        revertLogEntry
     } = useWizard();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -346,11 +347,11 @@ export default function Step1_SelectEmployees() {
                                     </div>
                                 ) : (
                                     <div className="log-list">
-                                        {actionLog.map(log => (
-                                            <div key={log.id} className={`log-entry-wrapper ${expandedLogs.includes(log.id) ? 'is-expanded' : ''}`}>
+                                        {actionLog.map((log, index) => (
+                                            <div key={log.id} className={`log-entry-wrapper ${expandedLogs.includes(log.id) ? 'is-expanded' : ''} ${log.status === 'reverted' ? 'is-reverted' : ''}`}>
                                                 <div className="log-entry-main" onClick={() => toggleLogExpansion(log.id)}>
                                                     <div className="log-icon-circle">
-                                                        {log.type === 'bulk_change' ? '📦' : '👤'}
+                                                        {log.type === 'bulk_change' ? '📦' : log.type === 'reversal' ? '↩️' : '👤'}
                                                     </div>
                                                     <div className="log-summary-content">
                                                         <div className="log-top-row">
@@ -359,24 +360,9 @@ export default function Step1_SelectEmployees() {
                                                         </div>
                                                         <div className="log-meta">
                                                             <span className={`status-pill ${log.status}`}>
-                                                                ● {log.status === 'reverted' ? 'Reverted' : 'Success'}
+                                                                ● {log.status === 'success' ? 'Success' : log.status === 'reverted' ? 'Reverted' : log.status}
                                                             </span>
                                                             <span className="type-pill">{log.type.replace('_', ' ')}</span>
-
-                                                            {/* Only showing revert for the latest non-reverted bulk/single change */}
-                                                            {idx === 0 && log.status !== 'reverted' && log.type !== 'revert' && (
-                                                                <button
-                                                                    className="btn-revert-sm"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        if (confirm('Are you sure you want to revert this action?')) {
-                                                                            revertAction(log.id);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    ↩ Revert Action
-                                                                </button>
-                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="log-toggle-icon">
@@ -385,63 +371,99 @@ export default function Step1_SelectEmployees() {
                                                 </div>
                                                 {expandedLogs.includes(log.id) && (
                                                     <div className="log-entry-details animate-slide-down">
-                                                        {log.type === 'revert' ? (
-                                                            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                                                                This action un-did changes from event ID: {log.details.revertedLogId}
-                                                            </p>
-                                                        ) : (
-                                                            <div className="details-grid">
-                                                                {log.type === 'bulk_change' ? (
-                                                                    <>
-                                                                        <div className="detail-box wide">
-                                                                            <label>Impact Summary</label>
-                                                                            <div className="impact-stats-mini">
-                                                                                <div className="mini-stat"><strong>{log.details.employeeCount}</strong> Employees</div>
-                                                                                <div className="mini-stat"><strong>{log.details.fields.length}</strong> Attributes</div>
-                                                                            </div>
+                                                        <div className="details-header">
+                                                            <h5>Change Details</h5>
+                                                            {index === 0 && log.status !== 'reverted' && log.type !== 'reversal' && (
+                                                                <button
+                                                                    className="btn btn-ghost btn-danger btn-xs"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (confirm('Are you sure you want to revert this change?')) {
+                                                                            revertLogEntry(log.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    Undo Change
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <div className="details-grid">
+                                                            {log.type === 'bulk_change' ? (
+                                                                <>
+                                                                    <div className="detail-box">
+                                                                        <label>Employee Scope</label>
+                                                                        <div className="scope-summary">
+                                                                            <span className="count">{log.details.employeeCount}</span> employees targeted
                                                                         </div>
-                                                                        <div className="detail-box">
-                                                                            <label>Attributes Modified</label>
-                                                                            <div className="field-pills">
-                                                                                {log.details.fields.map(f => <span key={f} className="field-pill">{getFieldLabel(f)}</span>)}
-                                                                            </div>
+                                                                    </div>
+                                                                    <div className="detail-box full-width">
+                                                                        <label>Modifications Applied</label>
+                                                                        <div className="mod-table-wrapper">
+                                                                            <table className="mod-detail-table">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Attribute</th>
+                                                                                        <th>Execution Logic</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {log.details.fields.map(f => (
+                                                                                        <tr key={f}>
+                                                                                            <td className="field-cell">{getFieldLabel(f)}</td>
+                                                                                            <td className="logic-cell">
+                                                                                                {f === 'compensation' ? 'Calculated new salary based on 5.5% annual merit increase' :
+                                                                                                    f === 'title' ? 'Mapping new job identifiers to downstream HRIS' :
+                                                                                                        'Updating attribute values directly in employee profile'}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                </tbody>
+                                                                            </table>
                                                                         </div>
-                                                                        <div className="detail-box">
-                                                                            <label>Effective Date</label>
-                                                                            <span>{log.details.effectiveDate}</span>
-                                                                        </div>
-                                                                        <div className="detail-box wide">
-                                                                            <label>System Sync Status</label>
-                                                                            <div className="sync-status-row">
-                                                                                <span>Payroll ✓</span>
-                                                                                <span>Benefits ✓</span>
-                                                                                <span>Slack ✓</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <div className="comparison-card">
-                                                                            <div className="comp-header">
-                                                                                <span className="comp-emp">{log.details.employeeName}</span>
-                                                                                <span className="comp-field">{getFieldLabel(log.details.field)}</span>
-                                                                            </div>
-                                                                            <div className="comp-body">
-                                                                                <div className="comp-side old">
-                                                                                    <label>Before</label>
-                                                                                    <span>{log.details.oldValue || '—'}</span>
+                                                                    </div>
+                                                                    <div className="detail-box">
+                                                                        <label>Effective Date</label>
+                                                                        <span className="date-badge">{log.details.effectiveDate}</span>
+                                                                    </div>
+                                                                </>
+                                                            ) : log.type === 'single_change' ? (
+                                                                <>
+                                                                    <div className="detail-box full-width">
+                                                                        <label>Employee Change Detail</label>
+                                                                        <div className="side-by-side-comparison">
+                                                                            <div className="comparison-emp-info">
+                                                                                <div className="avatar">{log.details.employeeName[0]}</div>
+                                                                                <div>
+                                                                                    <strong>{log.details.employeeName}</strong>
+                                                                                    <div className="id">{log.details.employeeId}</div>
                                                                                 </div>
-                                                                                <div className="comp-arrow">→</div>
-                                                                                <div className="comp-side new">
-                                                                                    <label>After</label>
-                                                                                    <span>{log.details.newValue}</span>
+                                                                            </div>
+                                                                            <div className="comparison-visual">
+                                                                                <div className="comp-field">
+                                                                                    <span className="label">Field:</span>
+                                                                                    <span className="value">{getFieldLabel(log.details.field)}</span>
+                                                                                </div>
+                                                                                <div className="comp-flow">
+                                                                                    <div className="comp-box old">
+                                                                                        <label>Old Value</label>
+                                                                                        <span>{log.details.oldValue || '—'}</span>
+                                                                                    </div>
+                                                                                    <div className="comp-arrow">→</div>
+                                                                                    <div className="comp-box new">
+                                                                                        <label>New Value</label>
+                                                                                        <span>{log.details.newValue}</span>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        )}
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <div className="detail-box full-width">
+                                                                    <p className="revert-info">This action reversed log entry <code>{log.details.revertedLogId}</code>.</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
