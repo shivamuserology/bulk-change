@@ -548,6 +548,138 @@
     text-align: right;
 }
 
+/* Revert Button and Comparison View */
+.btn-revert-sm {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: var(--spacing-md);
+    transition: all 0.2s ease;
+}
+
+.btn-revert-sm:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.status-pill.reverted {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.type-pill.revert {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+/* Rich Log Details */
+.detail-box.wide {
+    grid-column: span 2;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.impact-stats-mini {
+    display: flex;
+    gap: 24px;
+    margin-top: 4px;
+}
+
+.mini-stat {
+    font-size: 14px;
+    color: var(--plum-deep);
+}
+
+.sync-status-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* Comparison Card */
+.comparison-card {
+    grid-column: span 2;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--white);
+    max-width: 500px;
+}
+
+.comp-header {
+    background: #f8fafc;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+}
+
+.comp-emp {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.comp-field {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.comp-body {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 12px;
+}
+
+.comp-side {
+    flex: 1;
+    text-align: center;
+}
+
+.comp-side label {
+    display: block;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.comp-side span {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.comp-side.old span {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.comp-side.new span {
+    color: var(--plum-deep);
+}
+
+.comp-arrow {
+    font-size: 20px;
+    color: var(--border-color);
+}
+
+.log-entry-wrapper.is-expanded .log-icon-circle {
+    background: var(--plum-light);
+    color: white;
+}
+
 @keyframes slideDownActionLog {
     from {
         opacity: 0;
