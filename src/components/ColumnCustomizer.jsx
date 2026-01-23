@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import './ColumnCustomizer.css';
 
-const MAX_COLUMNS = 8;
+const MAX_COLUMNS = 10;
 
 // Define available columns with their display labels and field mappings
 const AVAILABLE_COLUMNS = [
@@ -28,7 +28,7 @@ const AVAILABLE_COLUMNS = [
     { id: 'startDate', label: 'Start Date', category: 'Status', field: 'startDate', format: 'date' },
 ];
 
-export const DEFAULT_COLUMNS = ['department', 'title', 'workLocation', 'status'];
+export const DEFAULT_COLUMNS = ['department', 'title', 'workLocation', 'manager', 'workEmail', 'status'];
 
 export default function ColumnCustomizer({ selectedColumns, onColumnsChange, onClose }) {
     const [searchTerm, setSearchTerm] = useState('');

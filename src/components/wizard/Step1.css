@@ -78,7 +78,8 @@
 
 .search-field-container {
     position: relative;
-    width: 300px;
+    width: 400px;
+    /* Widened from 300px */
     margin-right: var(--spacing-sm);
 }
 
