@@ -1,3 +1,85 @@
+/* Selected Attributes Summary */
+.selected-attributes-summary {
+    display: flex;
+    align-items: center;
+    /* Align items vertically */
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    background: var(--bg-tertiary);
+    padding: 12px 16px;
+    /* Increased padding */
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    /* Added border */
+}
+
+.summary-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    /* Made slightly bolder */
+    color: var(--text-primary);
+    /* Darker color */
+    margin-top: 0;
+    /* Removed margin-top */
+    white-space: nowrap;
+    /* Prevent wrapping */
+}
+
+.summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    /* Slightly larger gap */
+}
+
+.attribute-chip {
+    font-size: 12px;
+    /* Slightly larger font */
+    padding: 4px 10px;
+    /* Increased padding */
+    border-radius: 16px;
+    /* More rounded */
+    font-weight: var(--font-weight-medium);
+    border: 1px solid transparent;
+    display: inline-flex;
+    /* Ensure vertical centering */
+    align-items: center;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+    /* Add transition */
+}
+
+.attribute-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Subtle hover effect */
+}
+
+.chip-success {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border-color: rgba(30, 70, 32, 0.1);
+    /* Subtle border */
+}
+
+.chip-warning {
+    background-color: var(--warning-bg);
+    color: var(--warning);
+    border-color: rgba(176, 96, 0, 0.1);
+}
+
+.chip-error {
+    background-color: var(--error-bg);
+    color: var(--error);
+    border-color: rgba(197, 34, 31, 0.1);
+}
+
+.chip-neutral {
+    background-color: var(--white);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
 .templates-section {
     margin-bottom: var(--spacing-lg);
 }
