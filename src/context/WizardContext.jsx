@@ -39,6 +39,7 @@ export const ENTRY_MODES = {
 const initialState = {
     currentStep: 1,
     selectedEmployees: [],
+    filters: {}, // Add filters state
     selectedFields: [],
     fieldValues: {}, // { fieldId: { type: 'set'|'increase'|'replace', value: any, cohorts: [] } }
     effectiveDate: 'immediate',
@@ -143,6 +144,14 @@ export function WizardProvider({ children }) {
                 ...prev.fieldValues,
                 [fieldId]: valueConfig
             }
+        }));
+    }, []);
+
+    // Filter state
+    const setFilters = useCallback((filters) => {
+        setState(prev => ({
+            ...prev,
+            filters
         }));
     }, []);
 
@@ -397,6 +406,9 @@ export function WizardProvider({ children }) {
         selectField,
         setSelectedFields,
         getFieldPermission,
+
+        // Filters
+        setFilters,
 
         // Field values
         setFieldValue,

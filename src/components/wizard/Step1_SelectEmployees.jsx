@@ -15,13 +15,14 @@ export default function Step1_SelectEmployees() {
         clearEmployees,
         nextStep,
         entryMode,
-        importCSVEmployees
+        importCSVEmployees,
+        filters,    // From context
+        setFilters  // From context
     } = useWizard();
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filters state: { [fieldId]: [selectedOption1, selectedOption2, ...], ... }
-    const [filters, setFilters] = useState({});
+    // Filters state now in context
 
     const [showCSVModal, setShowCSVModal] = useState(entryMode === ENTRY_MODES.CSV_EMPLOYEE_LIST);
     const [csvResult, setCsvResult] = useState(null);

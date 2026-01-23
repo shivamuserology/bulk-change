@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useWizard } from '../../context/WizardContext';
 import LayeredPanel from '../common/LayeredPanel';
+import SelectionContextBar from '../common/SelectionContextBar';
 import './Step2.css';
 
 // Templates for common bulk changes
@@ -32,11 +33,77 @@ export default function Step2_ChooseAttributes() {
         setSelectedFields,
         nextStep,
         prevStep,
-        selectedEmployees
+        selectedEmployees, // IDs
+        employees,         // All data
+        filters,
+        getFieldPermission
     } = useWizard();
 
     const applyTemplate = (template) => {
         setSelectedFields(template.fields);
+    };
+
+    // Helper to get selected field permissions
+    const getFieldBadgeClass = (fieldId) => {
+        // Find field in schema
+        for (const cat of fieldSchema.categories) {
+            const field = cat.fields.find(f => f.id === fieldId);
+            if (field) {
+                const perm = getFieldPermission(field);
+                if (perm === 'approval_required') return 'chip-warning';
+                if (perm === 'no_access') return 'chip-error';
+                return 'chip-success';
+            }
+        }
+        return 'chip-neutral';
+    };
+
+    const getFieldLabel = (fieldId) => {
+        for (const cat of fieldSchema.categories) {
+            const field = cat.fields.find(f => f.id === fieldId);
+            if (field) return field.label;
+        }
+        return fieldId;
+    };
+
+    // Generate and download CSV
+    const handleDownloadPreview = () => {
+        if (!selectedEmployees.length) return;
+
+        // Header row
+        const headers = ['Employee ID', 'Name', ...selectedFields.map(getFieldLabel)];
+
+        // Data rows
+        const rows = selectedEmployees.map(empId => {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return [];
+
+            const row = [
+                emp.id,
+                `${emp.legalFirstName} ${emp.legalLastName}`
+            ];
+
+            selectedFields.forEach(fieldId => {
+                row.push(emp[fieldId] || '');
+            });
+            return row;
+        });
+
+        // CSV String
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        // Trigger Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('button');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `preview_export_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -50,22 +117,46 @@ export default function Step2_ChooseAttributes() {
                 </div>
             </div>
 
-            {/* Templates */}
-            <div className="templates-section">
-                <h4>Quick Templates</h4>
-                <div className="templates-grid">
-                    {TEMPLATES.map(template => (
-                        <button
-                            key={template.id}
-                            className="template-card"
-                            onClick={() => applyTemplate(template)}
-                        >
-                            <span className="template-name">{template.name}</span>
-                            <span className="template-desc">{template.description}</span>
-                        </button>
-                    ))}
+            {/* Context Bar */}
+            <SelectionContextBar
+                count={selectedEmployees.length}
+                totalCount={employees.length}
+                filters={filters}
+                onDownload={handleDownloadPreview}
+            />
+
+            {/* Selected Attributes Summary (Chips) */}
+            {selectedFields.length > 0 && (
+                <div className="selected-attributes-summary">
+                    <span className="summary-label">Selected:</span>
+                    <div className="summary-chips">
+                        {selectedFields.map(fieldId => (
+                            <span key={fieldId} className={`attribute-chip ${getFieldBadgeClass(fieldId)}`}>
+                                {getFieldLabel(fieldId)}
+                            </span>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* Templates */}
+            {!selectedFields.length && (
+                <div className="templates-section">
+                    <h4>Quick Templates</h4>
+                    <div className="templates-grid">
+                        {TEMPLATES.map(template => (
+                            <button
+                                key={template.id}
+                                className="template-card"
+                                onClick={() => applyTemplate(template)}
+                            >
+                                <span className="template-name">{template.name}</span>
+                                <span className="template-desc">{template.description}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Selection Area - Using LayeredPanel */}
             <div style={{ flex: 1, minHeight: 0, marginBottom: '20px' }}>
