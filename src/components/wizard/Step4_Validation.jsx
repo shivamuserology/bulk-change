@@ -6,14 +6,11 @@ export default function Step4_Validation() {
     const {
         selectedEmployees,
         selectedFields,
-        fieldValues,
         validationResults,
         runValidation,
-        outcomeScenario,
         nextStep,
         prevStep,
-        employees,
-        fieldSchema
+        employees
     } = useWizard();
 
     const [isValidating, setIsValidating] = useState(true);
@@ -24,7 +21,6 @@ export default function Step4_Validation() {
         setIsValidating(true);
         setProgress(0);
 
-        // Simulate validation progress
         const interval = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 100) {
@@ -35,7 +31,6 @@ export default function Step4_Validation() {
             });
         }, 150);
 
-        // Run actual validation after animation
         setTimeout(() => {
             runValidation();
             setIsValidating(false);
@@ -43,9 +38,6 @@ export default function Step4_Validation() {
 
         return () => clearInterval(interval);
     }, [runValidation]);
-
-    const allFields = fieldSchema.categories.flatMap(c => c.fields);
-    const getFieldLabel = (fieldId) => allFields.find(f => f.id === fieldId)?.label || fieldId;
 
     const canProceed = validationResults &&
         (validationResults.status === 'success' || validationResults.status === 'warning') &&
@@ -55,168 +47,123 @@ export default function Step4_Validation() {
         <div className="step-container animate-fade-in">
             <div className="step-header">
                 <div>
-                    <h2>Validation</h2>
+                    <h2>Validation Analysis</h2>
                     <p className="step-description">
-                        Checking {selectedEmployees.length} employees and {selectedFields.length} fields for issues
+                        Analyzing {selectedEmployees.length} employees and {selectedFields.length} attributes for consistency.
                     </p>
                 </div>
             </div>
 
             {isValidating ? (
-                <div className="validation-loading card">
-                    <div className="card-body">
-                        <div className="validation-progress">
-                            <div className="loader"></div>
-                            <h3>Running Validation Checks...</h3>
-                            <div className="progress-bar">
-                                <div
-                                    className="progress-fill"
-                                    style={{ width: `${progress}%` }}
-                                ></div>
-                            </div>
-                            <div className="validation-steps">
-                                <div className={`val-step ${progress >= 20 ? 'done' : ''}`}>
-                                    ✓ Checking business rules
-                                </div>
-                                <div className={`val-step ${progress >= 40 ? 'done' : ''}`}>
-                                    ✓ Validating permissions
-                                </div>
-                                <div className={`val-step ${progress >= 60 ? 'done' : ''}`}>
-                                    ✓ Checking downstream systems
-                                </div>
-                                <div className={`val-step ${progress >= 80 ? 'done' : ''}`}>
-                                    ✓ Verifying third-party apps
-                                </div>
-                                <div className={`val-step ${progress >= 100 ? 'done' : ''}`}>
-                                    ✓ Detecting conflicts
-                                </div>
-                            </div>
+                <div className="loading-hero">
+                    <div className="modern-progress-large">
+                        <div className="modern-progress-fill" style={{ width: `${progress}%` }}></div>
+                    </div>
+                    <h3>Performing Validation Checks</h3>
+                    <p>Connecting to downstream payroll and benefit systems...</p>
+
+                    <div className="validation-pulse">
+                        <div className={`pulse-item ${progress >= 20 ? 'done' : 'active'}`}>
+                            <div className="dot"></div> Business Rules
+                        </div>
+                        <div className={`pulse-item ${progress >= 50 ? (progress >= 80 ? 'done' : 'active') : ''}`}>
+                            <div className="dot"></div> Permissions
+                        </div>
+                        <div className={`pulse-item ${progress >= 80 ? 'active' : ''}`}>
+                            <div className="dot"></div> Conflict Detection
                         </div>
                     </div>
                 </div>
             ) : (
-                <div className="validation-results">
-                    {/* Status Summary */}
-                    <div className={`validation-status ${validationResults.status}`}>
-                        {validationResults.status === 'success' && (
-                            <>
-                                <span className="status-icon">✅</span>
-                                <div className="status-content">
-                                    <h3>All Checks Passed</h3>
-                                    <p>{selectedEmployees.length} employees ready for update</p>
+                <div className="validation-layout">
+
+                    {/* Main Column */}
+                    <div className="validation-main-column">
+
+                        {/* Status Hero */}
+                        <div className={`premium-status-hero ${validationResults.status}`}>
+                            <div className="status-icon-large">
+                                {validationResults.status === 'success' ? '✅' : validationResults.status === 'warning' ? '⚠️' : '❌'}
+                            </div>
+                            <div className="status-text-area">
+                                <h3>
+                                    {validationResults.status === 'success' && 'All Checks Passed'}
+                                    {validationResults.status === 'warning' && 'Validation Warning'}
+                                    {validationResults.status === 'error' && 'Validation Issues Found'}
+                                </h3>
+                                <p>
+                                    {validationResults.status === 'success' && `${selectedEmployees.length} employees are ready for the update.`}
+                                    {validationResults.status === 'warning' && 'Proceed with caution. Check high-priority warnings on the right.'}
+                                    {validationResults.status === 'error' && `${validationResults.failedEmployees.length} employees encountered errors that require attention.`}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Systems Checked */}
+                        <div className="modern-systems-card">
+                            <div className="card-header">
+                                <h4>Systems Verified</h4>
+                            </div>
+                            <div className="systems-grid-modern">
+                                <div className="system-tile">
+                                    <span className="icon">💰</span>
+                                    <span className="name">Payroll</span>
+                                    <span className="check">✓</span>
                                 </div>
-                            </>
-                        )}
-                        {validationResults.status === 'warning' && (
-                            <>
-                                <span className="status-icon">⚠️</span>
-                                <div className="status-content">
-                                    <h3>Passed with Warnings</h3>
-                                    <p>Review warnings below before proceeding</p>
+                                <div className="system-tile">
+                                    <span className="icon">🏥</span>
+                                    <span className="name">Benefits</span>
+                                    <span className="check">✓</span>
                                 </div>
-                            </>
-                        )}
-                        {validationResults.status === 'error' && (
-                            <>
-                                <span className="status-icon">❌</span>
-                                <div className="status-content">
-                                    <h3>Validation Issues Found</h3>
-                                    <p>{validationResults.failedEmployees.length} employees have issues</p>
+                                <div className="system-tile">
+                                    <span className="icon">💻</span>
+                                    <span className="name">Device Mgmt</span>
+                                    <span className="check">✓</span>
                                 </div>
-                            </>
-                        )}
+                                <div className="system-tile">
+                                    <span className="icon">💬</span>
+                                    <span className="name">Slack</span>
+                                    <span className="check">✓</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Errors */}
-                    {validationResults.errors?.length > 0 && (
-                        <div className="validation-section">
-                            <h4>❌ Errors</h4>
-                            {validationResults.errors.map((error, idx) => (
-                                <div key={idx} className={`validation-item error ${error.blocking ? 'blocking' : ''}`}>
-                                    <div className="val-item-header">
-                                        <span className="val-type">{error.type.replace(/_/g, ' ')}</span>
-                                        {error.blocking && <span className="badge badge-error">Blocking</span>}
-                                    </div>
-                                    <p className="val-message">{error.message}</p>
-                                    {error.employees.length > 0 && (
-                                        <div className="val-employees">
-                                            Affected: {error.employees.map(id => {
-                                                const emp = employees.find(e => e.id === id);
-                                                return emp ? `${emp.legalFirstName} ${emp.legalLastName} (${id})` : id;
-                                            }).join(', ')}
+                    {/* Sidebar */}
+                    <div className="validation-sidebar">
+                        <div className="sidebar-header">
+                            <h4>Issues & Alerts</h4>
+                        </div>
+                        <div className="sidebar-content">
+                            {(!validationResults.errors?.length && !validationResults.warnings?.length) ? (
+                                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>✨</div>
+                                    <p style={{ fontSize: '13px' }}>Clean slate! No issues detected.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {validationResults.errors?.map((error, idx) => (
+                                        <div key={`err-${idx}`} className="sidebar-list-item error">
+                                            <span className="item-badge error">{error.blocking ? 'Blocking' : 'Error'}</span>
+                                            <h5>{error.type.replace(/_/g, ' ')}</h5>
+                                            <p>{error.message}</p>
+                                            <div className="affected-list">
+                                                {error.employees.length} employees affected
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Warnings */}
-                    {validationResults.warnings?.length > 0 && (
-                        <div className="validation-section">
-                            <h4>⚠️ Warnings</h4>
-                            {validationResults.warnings.map((warning, idx) => (
-                                <div key={idx} className="validation-item warning">
-                                    <div className="val-item-header">
-                                        <span className="val-type">{warning.type.replace(/_/g, ' ')}</span>
-                                    </div>
-                                    <p className="val-message">{warning.message}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Passed Summary */}
-                    {validationResults.passedEmployees?.length > 0 && (
-                        <div className="validation-section">
-                            <h4>✅ Validated Successfully</h4>
-                            <div className="passed-summary">
-                                <span className="passed-count">{validationResults.passedEmployees.length}</span>
-                                <span className="passed-label">employees ready</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Systems Checked */}
-                    <div className="systems-checked card">
-                        <div className="card-header">
-                            <h4>Systems Verified</h4>
-                        </div>
-                        <div className="card-body">
-                            <div className="systems-grid">
-                                <div className="system-check success">
-                                    <span className="system-icon">💰</span>
-                                    <span className="system-name">Payroll</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                                <div className="system-check success">
-                                    <span className="system-icon">🏥</span>
-                                    <span className="system-name">Benefits</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                                <div className="system-check success">
-                                    <span className="system-icon">💻</span>
-                                    <span className="system-name">Device Mgmt</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                                <div className="system-check success">
-                                    <span className="system-icon">💬</span>
-                                    <span className="system-name">Slack</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                                <div className="system-check success">
-                                    <span className="system-icon">📧</span>
-                                    <span className="system-name">Google</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                                <div className="system-check success">
-                                    <span className="system-icon">🐙</span>
-                                    <span className="system-name">GitHub</span>
-                                    <span className="system-status">✓</span>
-                                </div>
-                            </div>
+                                    ))}
+                                    {validationResults.warnings?.map((warning, idx) => (
+                                        <div key={`warn-${idx}`} className="sidebar-list-item warning">
+                                            <span className="item-badge warning">Warning</span>
+                                            <h5>{warning.type.replace(/_/g, ' ')}</h5>
+                                            <p>{warning.message}</p>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
                     </div>
+
                 </div>
             )}
 
@@ -226,8 +173,8 @@ export default function Step4_Validation() {
                 </button>
                 <div className="footer-actions">
                     {validationResults?.status === 'error' && validationResults.passedEmployees.length > 0 && (
-                        <button className="btn btn-secondary">
-                            Continue with {validationResults.passedEmployees.length} valid employees
+                        <button className="btn btn-secondary" style={{ marginRight: '12px' }}>
+                            Continue with {validationResults.passedEmployees.length} valid
                         </button>
                     )}
                     <button
