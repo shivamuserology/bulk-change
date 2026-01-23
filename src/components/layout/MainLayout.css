@@ -6,35 +6,36 @@
     overflow: hidden;
 }
 
-/* Sidebar - Light Theme */
+/* Sidebar */
 .sidebar {
-    width: 56px;
-    background-color: #FFFFFF;
+    width: 64px;
+    background-color: var(--plum-deep);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #E5E7EB;
+    align-items: center;
+    padding: var(--spacing-md) 0;
     z-index: 50;
     flex-shrink: 0;
+}
+
+.sidebar-logo {
+    width: 32px;
+    height: 32px;
+    margin-bottom: var(--spacing-xl);
+    color: var(--yellow-accent);
+}
+
+.sidebar-logo svg {
+    width: 100%;
+    height: 100%;
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    padding-top: var(--spacing-md);
-}
-
-.sidebar-section {
-    display: flex;
-    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
     align-items: center;
-    gap: 4px;
-}
-
-.sidebar-divider {
-    height: 1px;
-    background-color: #E5E7EB;
-    margin: var(--spacing-md) var(--spacing-sm);
 }
 
 .sidebar-item {
@@ -43,66 +44,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    color: #6B7280;
+    color: var(--plum-light);
+    font-size: 1.25rem;
     transition: all var(--transition-fast);
-    position: relative;
 }
 
 .sidebar-item:hover {
-    background-color: #F3F4F6;
-    color: #374151;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
 }
 
 .sidebar-item.active {
-    color: #374151;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--yellow-accent);
+    position: relative;
 }
 
-.sidebar-item.active::after {
+.sidebar-item.active::before {
     content: '';
     position: absolute;
-    right: -8px;
+    left: -12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 3px;
+    width: 4px;
     height: 24px;
-    background-color: #F97316;
-    border-radius: 3px 0 0 3px;
-}
-
-.sidebar-item svg {
-    width: 20px;
-    height: 20px;
+    background-color: var(--yellow-accent);
+    border-radius: 0 4px 4px 0;
 }
 
 .sidebar-footer {
-    padding: var(--spacing-md) 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.sidebar-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.sidebar-avatar img {
+    margin-top: auto;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.sidebar-accent-bar {
-    width: 24px;
-    height: 4px;
-    background-color: #F97316;
-    border-radius: 2px;
-    margin-top: var(--spacing-xs);
+    display: flex;
+    justify-content: center;
 }
 
 /* Layout Content */
@@ -115,21 +91,20 @@
 
 /* Top Nav */
 .top-nav {
-    height: 48px;
-    background-color: #3D2B33;
-    /* Slightly lighter plum */
+    height: 56px;
+    background-color: var(--plum-deep);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--spacing-lg);
     color: var(--white);
     flex-shrink: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .search-bar-container {
-    flex: 0 0 400px;
-    max-width: 40%;
+    flex: 0 0 600px;
+    /* Wider search bar */
+    max-width: 50%;
 }
 
 .global-search {
@@ -141,15 +116,9 @@
     gap: var(--spacing-sm);
 }
 
-.global-search .search-icon,
-.search-icon-svg {
+.global-search .search-icon {
     font-size: 14px;
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-.global-search input::placeholder {
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .global-search input {
@@ -169,26 +138,17 @@
     font-weight: var(--font-weight-semibold);
 }
 
-.nav-action-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
+.support-link {
+    color: var(--white);
     cursor: pointer;
     opacity: 0.9;
 }
 
-.nav-action-text {
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.5px;
-}
-
-.nav-action-icon {
-    font-size: 14px;
-}
-
-.nav-divider {
-    opacity: 0.3;
-    margin: 0 var(--spacing-xs);
+.accessibility-icon {
+    color: var(--white);
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.9;
 }
 
 .user-profile {
@@ -203,13 +163,14 @@
 .avatar {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #8D7B82 0%, #654F58 100%);
+    background-color: #A0A0A0;
+    /* Placeholder grey */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--white);
-    font-weight: var(--font-weight-bold);
+    color: var(--plum-deep);
+    font-weight: bold;
     font-size: var(--font-size-xs);
 }
 
