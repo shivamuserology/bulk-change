@@ -36,6 +36,105 @@ export const ENTRY_MODES = {
     CSV_COMPLETE: 'csv_complete'
 };
 
+const defaultActionLog = [
+    {
+        id: 'log_bulk_1',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        status: 'success',
+        type: 'bulk_change',
+        summary: 'Updated 124 employees',
+        details: {
+            employeeCount: 124,
+            fields: ['department', 'workLocation', 'title'],
+            effectiveDate: 'Feb 1, 2026',
+            scenario: 'happy_path'
+        }
+    },
+    {
+        id: 'log_bulk_2',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+        status: 'success',
+        type: 'bulk_change',
+        summary: 'Updated 45 employees',
+        details: {
+            employeeCount: 45,
+            fields: ['compensation', 'equity'],
+            effectiveDate: 'Immediate',
+            scenario: 'with_warnings'
+        }
+    },
+    {
+        id: 'log_single_1',
+        timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+        status: 'success',
+        type: 'single_change',
+        summary: 'Updated Department for James Smith',
+        details: {
+            employeeId: 'EMP0001',
+            employeeName: 'James Smith',
+            field: 'department',
+            oldValue: 'Engineering',
+            newValue: 'Platform'
+        }
+    },
+    {
+        id: 'log_single_2',
+        timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+        status: 'success',
+        type: 'single_change',
+        summary: 'Updated Work Location for Mary Johnson',
+        details: {
+            employeeId: 'EMP0002',
+            employeeName: 'Mary Johnson',
+            field: 'workLocation',
+            oldValue: 'Remote',
+            newValue: 'San Francisco, CA'
+        }
+    },
+    {
+        id: 'log_single_3',
+        timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+        status: 'success',
+        type: 'single_change',
+        summary: 'Updated Job Title for Robert Brown',
+        details: {
+            employeeId: 'EMP0003',
+            employeeName: 'Robert Brown',
+            field: 'title',
+            oldValue: 'Engineer',
+            newValue: 'Senior Engineer'
+        }
+    },
+    {
+        id: 'log_single_4',
+        timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+        status: 'success',
+        type: 'single_change',
+        summary: 'Updated Compensation for Emily White',
+        details: {
+            employeeId: 'EMP0004',
+            employeeName: 'Emily White',
+            field: 'compensation',
+            oldValue: 120000,
+            newValue: 135000
+        }
+    },
+    {
+        id: 'log_single_5',
+        timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
+        status: 'success',
+        type: 'single_change',
+        summary: 'Updated Manager for Michael Green',
+        details: {
+            employeeId: 'EMP0005',
+            employeeName: 'Michael Green',
+            field: 'managerName',
+            oldValue: 'Sarah Connors',
+            newValue: 'John Connor'
+        }
+    }
+];
+
 const initialState = {
     currentStep: 1,
     selectedEmployees: [],
@@ -46,7 +145,7 @@ const initialState = {
     customDate: null,
     validationResults: null,
     executionStatus: null,
-    actionLog: [], // Track session actions
+    actionLog: defaultActionLog, // Track session actions
 
     // Demo controls
     permissionScenario: PERMISSION_SCENARIOS.FULL_ACCESS,
