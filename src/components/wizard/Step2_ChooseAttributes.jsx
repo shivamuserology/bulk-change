@@ -125,16 +125,33 @@ export default function Step2_ChooseAttributes() {
                 onDownload={handleDownloadPreview}
             />
 
-            {/* Selected Attributes Summary (Chips) */}
+            {/* Selected Attributes Summary (Grouped) */}
             {selectedFields.length > 0 && (
                 <div className="selected-attributes-summary">
-                    <span className="summary-label">Selected:</span>
-                    <div className="summary-chips">
-                        {selectedFields.map(fieldId => (
-                            <span key={fieldId} className={`attribute-chip ${getFieldBadgeClass(fieldId)}`}>
-                                {getFieldLabel(fieldId)}
-                            </span>
-                        ))}
+                    <div className="summary-header">
+                        <span className="summary-label">Selected Attributes ({selectedFields.length})</span>
+                    </div>
+                    <div className="summary-groups">
+                        {fieldSchema.categories.map(cat => {
+                            const catFields = selectedFields.filter(fid =>
+                                cat.fields.some(f => f.id === fid)
+                            );
+
+                            if (catFields.length === 0) return null;
+
+                            return (
+                                <div key={cat.id} className="attribute-group">
+                                    <div className="group-name">{cat.name}</div>
+                                    <div className="group-chips">
+                                        {catFields.map(fieldId => (
+                                            <span key={fieldId} className={`attribute-chip ${getFieldBadgeClass(fieldId)}`}>
+                                                {getFieldLabel(fieldId)}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
