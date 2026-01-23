@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useWizard, ENTRY_MODES } from '../../context/WizardContext';
 import CSVUploadModal from '../CSVUploadModal';
+import ColumnCustomizer, { DEFAULT_COLUMNS, getColumnConfig, AVAILABLE_COLUMNS } from '../ColumnCustomizer';
 import './Step1.css';
 
 export default function Step1_SelectEmployees() {
@@ -24,6 +25,8 @@ export default function Step1_SelectEmployees() {
     const [filterMode, setFilterMode] = useState('AND');
     const [showCSVModal, setShowCSVModal] = useState(entryMode === ENTRY_MODES.CSV_EMPLOYEE_LIST);
     const [csvResult, setCsvResult] = useState(null);
+    const [showColumnCustomizer, setShowColumnCustomizer] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState(DEFAULT_COLUMNS);
 
     // Get unique values for filters
     const departments = useMemo(() => [...new Set(employees.map(e => e.department))], [employees]);
@@ -77,6 +80,32 @@ export default function Step1_SelectEmployees() {
         setCsvResult(result);
         setShowCSVModal(false);
     };
+
+    // Format cell value based on column config
+    const formatCellValue = (emp, colConfig) => {
+        const value = emp[colConfig.field];
+        if (value === undefined || value === null) return '—';
+
+        switch (colConfig.format) {
+            case 'currency':
+                return typeof value === 'number' ? `$${value.toLocaleString()}` : value;
+            case 'date':
+                return value ? new Date(value).toLocaleDateString() : '—';
+            case 'badge':
+                return (
+                    <span className={`badge ${value === 'Active' ? 'badge-success' : 'badge-warning'}`}>
+                        {value}
+                    </span>
+                );
+            default:
+                return value;
+        }
+    };
+
+    // Get active column configs
+    const activeColumns = visibleColumns
+        .map(colId => getColumnConfig(colId))
+        .filter(Boolean);
 
     return (
         <div className="step-container animate-fade-in">
@@ -177,6 +206,15 @@ export default function Step1_SelectEmployees() {
             </div>
 
             <div className="table-container">
+                <div className="table-header-actions">
+                    <button
+                        className="customize-columns-btn"
+                        onClick={() => setShowColumnCustomizer(true)}
+                    >
+                        <span className="icon">⚙</span>
+                        View Fields
+                    </button>
+                </div>
                 <table className="table">
                     <thead>
                         <tr>
@@ -189,10 +227,9 @@ export default function Step1_SelectEmployees() {
                                 />
                             </th>
                             <th>Employee</th>
-                            <th>Department</th>
-                            <th>Title</th>
-                            <th>Location</th>
-                            <th>Status</th>
+                            {activeColumns.map(col => (
+                                <th key={col.id}>{col.label}</th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
@@ -223,14 +260,9 @@ export default function Step1_SelectEmployees() {
                                         </div>
                                     </div>
                                 </td>
-                                <td>{emp.department}</td>
-                                <td>{emp.title}</td>
-                                <td>{emp.workLocation}</td>
-                                <td>
-                                    <span className={`badge ${emp.status === 'Active' ? 'badge-success' : 'badge-warning'}`}>
-                                        {emp.status}
-                                    </span>
-                                </td>
+                                {activeColumns.map(col => (
+                                    <td key={col.id}>{formatCellValue(emp, col)}</td>
+                                ))}
                             </tr>
                         ))}
                     </tbody>
@@ -265,6 +297,14 @@ export default function Step1_SelectEmployees() {
                     type="employee_list"
                     onClose={() => setShowCSVModal(false)}
                     onUpload={handleCSVUpload}
+                />
+            )}
+
+            {showColumnCustomizer && (
+                <ColumnCustomizer
+                    selectedColumns={visibleColumns}
+                    onColumnsChange={setVisibleColumns}
+                    onClose={() => setShowColumnCustomizer(false)}
                 />
             )}
         </div>
