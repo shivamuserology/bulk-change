@@ -22,271 +22,202 @@ export default function Step5_ReviewConfirm() {
         notifyEmployeesAction: true,
         notifyEmployeesChange: false
     });
-    const [expandedSections, setExpandedSections] = useState(['changes', 'impact']);
 
-    const toggleSection = (section) => {
-        setExpandedSections(prev =>
-            prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]
-        );
-    };
-
-    const allFields = fieldSchema.categories.flatMap(c => c.fields);
+    const allFields = useMemo(() => fieldSchema.categories.flatMap(c => c.fields), [fieldSchema]);
     const getFieldLabel = (fieldId) => allFields.find(f => f.id === fieldId)?.label || fieldId;
     const getFieldObj = (fieldId) => allFields.find(f => f.id === fieldId);
 
-    // Check for approval required
+    // Filter fields needing approval
     const fieldsNeedingApproval = useMemo(() => {
         return selectedFields.filter(fieldId => {
             const field = getFieldObj(fieldId);
             return field && getFieldPermission(field) === 'approval_required';
         });
-    }, [selectedFields, getFieldPermission]);
+    }, [selectedFields, getFieldPermission, allFields]);
 
     const needsApproval = fieldsNeedingApproval.length > 0 &&
         permissionScenario !== PERMISSION_SCENARIOS.FULL_ACCESS;
 
-    // Format effective date
+    // Formatting
     const formatEffectiveDate = () => {
         switch (effectiveDate) {
-            case 'immediate': return 'Immediately upon execution';
-            case 'next_pay_period': return 'February 1, 2026 (Start of next pay period)';
-            case 'next_month': return 'February 1, 2026 (First of next month)';
+            case 'immediate': return 'Immediately';
+            case 'next_pay_period': return 'Feb 1, 2026';
+            case 'next_month': return 'Feb 1, 2026';
             case 'custom': return customDate || 'Custom date';
             default: return effectiveDate;
         }
     };
 
-    // Format value for display
     const formatValue = (fieldId) => {
         const val = fieldValues[fieldId];
-        if (!val) return 'Not set';
-
-        if (val.type === 'set') {
-            return val.value || 'Not set';
-        } else if (val.type === 'increase') {
-            return `+${val.value}${val.isPercent ? '%' : ''}`;
-        } else if (val.type === 'decrease') {
-            return `-${val.value}${val.isPercent ? '%' : ''}`;
-        }
-        return val.value;
+        if (!val) return 'Default/Unchanged';
+        if (val.type === 'set') return val.value || 'Not set';
+        if (val.type === 'increase') return `+${val.value}${val.isPercent ? '%' : ''}`;
+        if (val.type === 'decrease') return `-${val.value}${val.isPercent ? '%' : ''}`;
+        return val.value || 'Not set';
     };
 
     const handleSaveDraft = () => {
-        const draftId = saveDraft();
-        alert(`Draft saved! ID: ${draftId}`);
+        saveDraft();
+        alert('Draft saved successfully!');
     };
 
     return (
         <div className="step-container animate-fade-in">
-            <div className="step-header">
-                <div>
-                    <h2>Review & Confirm</h2>
-                    <p className="step-description">
-                        Review all changes before {needsApproval ? 'submitting for approval' : 'execution'}
-                    </p>
-                </div>
-                <div className="step-actions">
-                    <button className="btn btn-secondary" onClick={handleSaveDraft}>
-                        💾 Save as Draft
-                    </button>
-                </div>
-            </div>
-
-            {/* Summary Stats */}
-            <div className="summary-stats">
-                <div className="stat-card">
-                    <span className="stat-value">{selectedEmployees.length}</span>
-                    <span className="stat-label">Employees</span>
-                </div>
-                <div className="stat-card">
-                    <span className="stat-value">{selectedFields.length}</span>
-                    <span className="stat-label">Fields</span>
-                </div>
-                <div className="stat-card date">
-                    <span className="stat-value">📅</span>
-                    <span className="stat-label">{formatEffectiveDate()}</span>
-                </div>
-            </div>
-
-            {/* Changes Section */}
-            <div className="review-section">
-                <button
-                    className="section-header"
-                    onClick={() => toggleSection('changes')}
-                >
-                    <span className="section-toggle">
-                        {expandedSections.includes('changes') ? '▼' : '▶'}
-                    </span>
-                    <h4>Field Changes</h4>
-                    <span className="section-count">{selectedFields.length} fields</span>
-                </button>
-
-                {expandedSections.includes('changes') && (
-                    <div className="section-content">
-                        {selectedFields.map(fieldId => {
-                            const field = getFieldObj(fieldId);
-                            const permission = field ? getFieldPermission(field) : 'full';
-
-                            return (
-                                <div key={fieldId} className="change-row">
-                                    <div className="change-field">
-                                        <span className="field-name">{getFieldLabel(fieldId)}</span>
-                                        {permission === 'approval_required' && (
-                                            <span className="badge badge-warning">Needs Approval</span>
-                                        )}
-                                    </div>
-                                    <div className="change-value">
-                                        <span className="value-type">
-                                            {fieldValues[fieldId]?.type === 'set' && 'Set to'}
-                                            {fieldValues[fieldId]?.type === 'increase' && 'Increase by'}
-                                            {fieldValues[fieldId]?.type === 'decrease' && 'Decrease by'}
-                                        </span>
-                                        <span className="value-text">{formatValue(fieldId)}</span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-
-            {/* Impact Section */}
-            <div className="review-section">
-                <button
-                    className="section-header"
-                    onClick={() => toggleSection('impact')}
-                >
-                    <span className="section-toggle">
-                        {expandedSections.includes('impact') ? '▼' : '▶'}
-                    </span>
-                    <h4>Downstream Impact</h4>
-                </button>
-
-                {expandedSections.includes('impact') && (
-                    <div className="section-content">
-                        <div className="impact-grid">
-                            <div className="impact-item">
-                                <span className="impact-icon">💰</span>
-                                <span className="impact-name">Payroll</span>
-                                <span className="impact-status update">Will Update</span>
-                            </div>
-                            <div className="impact-item">
-                                <span className="impact-icon">🏥</span>
-                                <span className="impact-name">Benefits</span>
-                                <span className="impact-status review">May Trigger Review</span>
-                            </div>
-                            <div className="impact-item">
-                                <span className="impact-icon">💬</span>
-                                <span className="impact-name">Slack</span>
-                                <span className="impact-status update">Will Sync</span>
-                            </div>
-                            <div className="impact-item">
-                                <span className="impact-icon">📧</span>
-                                <span className="impact-name">Google Workspace</span>
-                                <span className="impact-status update">Will Sync</span>
-                            </div>
-                            <div className="impact-item">
-                                <span className="impact-icon">🐙</span>
-                                <span className="impact-name">GitHub</span>
-                                <span className="impact-status none">No Changes</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Employee Action Required */}
-            <div className="review-section">
-                <button
-                    className="section-header"
-                    onClick={() => toggleSection('employee_actions')}
-                >
-                    <span className="section-toggle">
-                        {expandedSections.includes('employee_actions') ? '▼' : '▶'}
-                    </span>
-                    <h4>Employee Action Required</h4>
-                </button>
-
-                {expandedSections.includes('employee_actions') && (
-                    <div className="section-content">
-                        <div className="alert alert-info">
-                            If location changes apply, employees may need to update their tax forms and home address.
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Notifications */}
-            <div className="notifications-section card">
-                <div className="card-header">
-                    <h4>📧 Notifications</h4>
-                </div>
-                <div className="card-body">
-                    <label className="notification-option">
-                        <input
-                            type="checkbox"
-                            checked={notifications.notifyEmployeesAction}
-                            onChange={(e) => setNotifications(n => ({ ...n, notifyEmployeesAction: e.target.checked }))}
-                        />
-                        <div className="notification-content">
-                            <span className="notification-title">Notify employees of required actions</span>
-                            <span className="notification-desc">Remind employees what they need to update</span>
-                        </div>
-                    </label>
-
-                    <label className="notification-option">
-                        <input
-                            type="checkbox"
-                            checked={notifications.notifyEmployeesChange}
-                            onChange={(e) => setNotifications(n => ({ ...n, notifyEmployeesChange: e.target.checked }))}
-                        />
-                        <div className="notification-content">
-                            <span className="notification-title">Notify employees of changes made</span>
-                            <span className="notification-desc">Inform employees about the update</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            {/* Approval Workflow */}
-            {needsApproval && (
-                <div className="approval-section card">
-                    <div className="card-header">
-                        <h4>🔐 Approval Required</h4>
-                    </div>
-                    <div className="card-body">
-                        <p>The following fields require approval before execution:</p>
-                        <div className="approval-fields">
-                            {fieldsNeedingApproval.map(fieldId => (
-                                <span key={fieldId} className="badge badge-warning">
-                                    {getFieldLabel(fieldId)}
-                                </span>
-                            ))}
-                        </div>
-                        <div className="approval-info">
-                            <p>
-                                <strong>Finance Team</strong> will be notified for Compensation changes.
-                                <br />
-                                <strong>Equity Admin</strong> will be notified for Equity changes.
-                            </p>
-                            <p className="text-muted">
-                                You'll be notified when approved or if changes are requested.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="step-footer">
-                <button className="btn btn-secondary" onClick={prevStep}>
+            {/* Nav Header */}
+            <div className="step-header" style={{ marginBottom: '24px' }}>
+                <button className="btn btn-secondary btn-sm" onClick={prevStep}>
                     ← Back
                 </button>
-                <button
-                    className="btn btn-accent btn-lg"
-                    onClick={nextStep}
-                >
-                    {needsApproval ? '🔐 Submit for Approval' : '🚀 Execute Changes'}
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                    <h2 style={{ margin: 0 }}>Review Changes</h2>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={handleSaveDraft} style={{ color: 'var(--plum-deep)' }}>
+                    💾 Save Draft
                 </button>
+            </div>
+
+            <div className="step5-dashboard">
+
+                {/* Stats Row */}
+                <div className="step5-stats-row">
+                    <div className="stat-tile">
+                        <div className="icon">👥</div>
+                        <div className="content">
+                            <span className="value">{selectedEmployees.length}</span>
+                            <span className="label">Employees</span>
+                        </div>
+                    </div>
+                    <div className="stat-tile">
+                        <div className="icon">📝</div>
+                        <div className="content">
+                            <span className="value">{selectedFields.length}</span>
+                            <span className="label">Attributes</span>
+                        </div>
+                    </div>
+                    <div className="stat-tile">
+                        <div className="icon">📅</div>
+                        <div className="content">
+                            <span className="value">{formatEffectiveDate()}</span>
+                            <span className="label">Effective Date</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Left Column: Change Log */}
+                <div className="change-log-card">
+                    <div className="log-header">
+                        <h4>Proposed Field Changes</h4>
+                    </div>
+                    <div className="log-content">
+                        {selectedFields.length === 0 ? (
+                            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>No field changes selected.</p>
+                        ) : (
+                            selectedFields.map(fieldId => (
+                                <div key={fieldId} className="log-item">
+                                    <div className="log-field-info">
+                                        <span className="log-field-label">{getFieldLabel(fieldId)}</span>
+                                        {getFieldPermission(getFieldObj(fieldId)) === 'approval_required' && (
+                                            <span style={{ fontSize: '10px', color: '#f59e0b', fontWeight: 'bold' }}>⚠️ NEEDS APPROVAL</span>
+                                        )}
+                                    </div>
+                                    <div className="log-change-detail">
+                                        <span className="value-pill">Current Values</span>
+                                        <span className="value-arrow">→</span>
+                                        <span className="value-pill new">{formatValue(fieldId)}</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Column: Sidebar */}
+                <div className="review-sidebar">
+
+                    {/* Impact Map */}
+                    <div className="sidebar-card">
+                        <div className="sidebar-card-header">
+                            <h5>Downstream Sync</h5>
+                        </div>
+                        <div className="sidebar-card-body">
+                            <div className="impact-tiles-grid">
+                                <div className="impact-tile-small">
+                                    <span className="icon">💰</span>
+                                    <span className="name">Payroll</span>
+                                    <span className="status">Auto-update</span>
+                                </div>
+                                <div className="impact-tile-small">
+                                    <span className="icon">🏥</span>
+                                    <span className="name">Benefits</span>
+                                    <span className="status">Syncing</span>
+                                </div>
+                                <div className="impact-tile-small">
+                                    <span className="icon">💬</span>
+                                    <span className="name">Slack</span>
+                                    <span className="status">Provision</span>
+                                </div>
+                                <div className="impact-tile-small">
+                                    <span className="icon">📧</span>
+                                    <span className="name">Google</span>
+                                    <span className="status">Syncing</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notification Settings */}
+                    <div className="sidebar-card">
+                        <div className="sidebar-card-header">
+                            <h5>Communication</h5>
+                        </div>
+                        <div className="sidebar-card-body">
+                            <div className="notify-item" onClick={() => setNotifications(n => ({ ...n, notifyEmployeesAction: !n.notifyEmployeesAction }))}>
+                                <input type="checkbox" checked={notifications.notifyEmployeesAction} readOnly />
+                                <div className="notify-text">
+                                    <h6>Notify Employees</h6>
+                                    <p>Send instructions for required tax/form updates.</p>
+                                </div>
+                            </div>
+                            <div className="notify-item" onClick={() => setNotifications(n => ({ ...n, notifyEmployeesChange: !n.notifyEmployeesChange }))}>
+                                <input type="checkbox" checked={notifications.notifyEmployeesChange} readOnly />
+                                <div className="notify-text">
+                                    <h6>Announcement</h6>
+                                    <p>Inform employees that these changes have been applied.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Approval Box if needed */}
+                    {needsApproval && (
+                        <div className="sidebar-card" style={{ borderColor: '#f59e0b', background: '#fffbeb' }}>
+                            <div className="sidebar-card-header" style={{ background: '#fef3c7' }}>
+                                <h5 style={{ color: '#92400e' }}>Approval Required</h5>
+                            </div>
+                            <div className="sidebar-card-body">
+                                <p style={{ fontSize: '11px', color: '#92400e', margin: 0 }}>
+                                    Your team (Finance/Equity) will be notified to review restricted fields before execution.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Final Execution Section */}
+                <div className="execution-controls">
+                    <h3>Confirm & Finish</h3>
+                    <p>
+                        {needsApproval
+                            ? "All changes will be queued for approval. Notifications will be sent once reviewed."
+                            : `You are about to update ${selectedEmployees.length} employee records. This action cannot be undone.`}
+                    </p>
+                    <button className="btn-execute" onClick={nextStep}>
+                        {needsApproval ? 'Submit for Approval' : '🚀 Execute Changes'}
+                    </button>
+                </div>
+
             </div>
         </div>
     );
