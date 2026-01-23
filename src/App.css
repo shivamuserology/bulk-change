@@ -1,15 +1,53 @@
-.app {
-  min-height: 100vh;
+/* Main App Structure tied to MainLayout */
+.wizard-content-wrapper {
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.main-content {
+.step-content-area {
   flex: 1;
-  padding: var(--spacing-lg);
-  padding-bottom: 100px;
-  /* Space for demo panel */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Important for nested scrolling */
 }
 
-/* Google Fonts import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Ensure step containers take full height for dashboard feel */
+.step-container,
+.dashboard-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

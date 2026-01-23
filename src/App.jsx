@@ -13,6 +13,8 @@ import CSVUploadModal from './components/CSVUploadModal';
 import './styles/rippling-tokens.css';
 import './App.css';
 
+import MainLayout from './components/layout/MainLayout';
+
 function WizardContent() {
   const { currentStep, entryMode, importCSVComplete } = useWizard();
   const [showCSVComplete, setShowCSVComplete] = React.useState(false);
@@ -43,11 +45,13 @@ function WizardContent() {
   };
 
   return (
-    <div className="app">
-      <ProgressHeader />
-      <main className="main-content">
-        {renderStep()}
-      </main>
+    <MainLayout>
+      <div className="wizard-content-wrapper">
+        {currentStep > 1 && <ProgressHeader />}
+        <div className="step-content-area">
+          {renderStep()}
+        </div>
+      </div>
       <DemoControlPanel />
 
       {showCSVComplete && (
@@ -57,7 +61,7 @@ function WizardContent() {
           onUpload={handleCSVComplete}
         />
       )}
-    </div>
+    </MainLayout>
   );
 }
 
