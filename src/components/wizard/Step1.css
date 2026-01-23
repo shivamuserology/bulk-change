@@ -23,126 +23,25 @@
     overflow: hidden;
 }
 
-/* Filter Panel */
-.filter-panel {
-    width: 280px;
-    background-color: var(--white);
-    border-right: 1px solid var(--border-light);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    z-index: 20;
+/* Filter Overlay Wrapper */
+.filter-overlay-wrapper {
+    position: absolute;
+    top: 56px;
+    /* Below top nav (which is usually around 56px) */
+    left: 20px;
+    /* Aligned with content padding */
+    bottom: 0;
+    z-index: 1000;
+    pointer-events: none;
+    /* Let clicks pass through, but child needs pointer-events: auto */
 }
 
-.filter-panel-header {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.filter-panel-header h3 {
-    margin: 0;
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-}
-
-.filter-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.btn-link {
-    background: none;
-    border: none;
-    color: var(--plum-deep);
-    font-size: var(--font-size-xs);
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
-}
-
-.close-btn {
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.filter-panel-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-md) 0;
-}
-
-.filter-category {
-    margin-bottom: var(--spacing-lg);
-    padding: 0 var(--spacing-md);
-}
-
-.category-title {
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: 0.5px;
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-xs);
-    border-bottom: 1px solid var(--border-light);
-}
-
-.filter-field-group {
-    margin-bottom: var(--spacing-md);
-}
-
-.field-label {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
-}
-
-.option-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 2px 0;
-}
-
-.checkbox-item input[type="checkbox"] {
-    accent-color: var(--plum-deep);
-}
-
-.checkbox-label {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.count-badge {
-    font-size: 10px;
-    background: var(--bg-tertiary);
-    color: var(--text-muted);
-    padding: 2px 6px;
-    border-radius: 10px;
+/* Re-enable pointer events for the panel itself */
+.layered-panel-container {
+    pointer-events: auto;
+    height: calc(100% - 20px) !important;
+    /* Spacing from bottom */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Badge on top nav filter button */

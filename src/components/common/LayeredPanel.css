@@ -1,0 +1,160 @@
+.layered-panel-container {
+    display: flex;
+    height: 100%;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+}
+
+.layered-panel-container.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    /* Full height of parent container */
+    z-index: 100;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Columns */
+.panel-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-right: 1px solid var(--border-light);
+    overflow: hidden;
+    transition: width var(--transition-medium);
+}
+
+.panel-column:last-child {
+    border-right: none;
+}
+
+.col-1 {
+    width: 200px;
+    background: var(--bg-secondary);
+}
+
+.col-2 {
+    width: 250px;
+    background: var(--white);
+}
+
+.col-3 {
+    width: 250px;
+    background: var(--white);
+}
+
+/* Header */
+.panel-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: inherit;
+    flex-shrink: 0;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* List Items */
+.panel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-sm) 0;
+}
+
+.list-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    transition: background var(--transition-fast);
+}
+
+.list-item:hover {
+    background: var(--hover-bg);
+}
+
+.list-item.active {
+    background: var(--plum-light-bg);
+    /* Use a light plum background */
+    color: var(--plum-deep);
+    font-weight: var(--font-weight-medium);
+}
+
+.item-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+/* Checkbox Items (for Col 2 selection mode and Col 3) */
+.checkbox-item {
+    padding: var(--spacing-xs) var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-item:hover {
+    background: var(--hover-bg);
+}
+
+.checkbox-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Search */
+.panel-search {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.panel-search input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+/* Close button for overlay */
+.panel-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 101;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}

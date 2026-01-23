@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useWizard, ENTRY_MODES } from '../../context/WizardContext';
 import CSVUploadModal from '../CSVUploadModal';
 import ColumnCustomizer, { DEFAULT_COLUMNS, getColumnConfig } from '../ColumnCustomizer';
-import FilterPanel from './FilterPanel';
+import LayeredPanel from '../common/LayeredPanel'; // Use unified panel
 import fieldSchema from '../../data/fieldSchema.json';
 import './Step1.css';
 
@@ -180,15 +180,20 @@ export default function Step1_SelectEmployees() {
     return (
         <div className="dashboard-view animate-fade-in">
             <div className="view-content-wrapper">
-                {/* Filter Sidebar (Left Panel) */}
-                <FilterPanel
-                    isOpen={filtersPanelOpen}
-                    onClose={() => setFiltersPanelOpen(false)}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    schema={fieldSchema}
-                    employeeData={employees}
-                />
+                {/* Filter Sidebar (Left Panel Overlay) */}
+                {filtersPanelOpen && (
+                    <div className="filter-overlay-wrapper">
+                        <LayeredPanel
+                            mode="filter"
+                            type="overlay"
+                            schema={fieldSchema}
+                            selected={filters}
+                            onChange={handleFilterChange}
+                            onClose={() => setFiltersPanelOpen(false)}
+                            data={employees}
+                        />
+                    </div>
+                )}
 
                 <div className="main-work-area">
                     {/* Header Section */}
