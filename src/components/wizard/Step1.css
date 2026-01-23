@@ -13,11 +13,12 @@
 }
 
 /* Tabs */
+/* Tabs */
 .tabs-container {
     padding: var(--spacing-md) var(--spacing-lg) 0;
     display: flex;
     gap: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light);
     margin-bottom: var(--spacing-lg);
     background: var(--bg-secondary);
 }
@@ -25,8 +26,8 @@
 .dashboard-tab {
     background: transparent;
     border: none;
-    padding: var(--spacing-sm) var(--spacing-xs);
-    font-size: var(--font-size-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     cursor: pointer;
@@ -34,139 +35,86 @@
     bottom: -1px;
     border-bottom: 2px solid transparent;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--grey-light-2);
+    /* Inactive tabs look like buttons in screenshot? No, they look like tabs but "active" is just text. Wait, screenshot has "Timecards" as a grey box? No, "Timecards" is active and looks like a button/tab. */
+}
+
+/* Actually, looking closer at screenshot: "Timecards" is a grey box (active), "Change requests" is text. */
+/* Let's try to match the "Timecards" active look. */
+.dashboard-tab {
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .dashboard-tab.active {
-    color: var(--plum-deep);
-    font-weight: var(--font-weight-semibold);
-    border-bottom-color: var(--plum-deep);
+    background-color: #EBEBEB;
+    /* Light grey active state */
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: none;
 }
 
-/* Header Row - Rippling Style */
-.dashboard-header-row {
+.tab-badge {
+    background-color: #3B5998;
+    /* Blueish badge */
+    color: white;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* Controls Header */
+.dashboard-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--white);
-    border-bottom: 1px solid var(--border-light);
+    padding: 0 var(--spacing-lg);
 }
 
-.header-title {
+.page-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-md);
-}
-
-.header-title-text {
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-}
-
-.header-title-separator {
-    color: var(--text-muted);
-}
-
-.header-title-count {
-    color: var(--text-secondary);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.search-box {
-    position: relative;
-    width: 280px;
-}
-
-.search-box .search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-}
-
-.search-box input {
-    width: 100%;
-    padding: 6px 12px 6px 32px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
-    background: var(--white);
-}
-
-.search-box input::placeholder {
-    color: var(--text-muted);
-}
-
-.filter-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: var(--white);
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-
-.filter-btn:hover {
-    background: var(--bg-tertiary);
-}
-
-.filter-btn.active {
-    background: var(--plum-deep);
-    color: var(--white);
-    border-color: var(--plum-deep);
-}
-
-.action-btn {
-    padding: 6px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: var(--white);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    color: var(--text-primary);
-}
-
-.action-btn:hover {
-    background: var(--bg-tertiary);
-}
-
-.action-btn.primary {
-    background: var(--plum-deep);
-    color: var(--white);
-    border-color: var(--plum-deep);
-}
-
-.action-btn.primary:hover {
-    background: var(--plum-dark);
-}
-
-/* Filters Row */
-.filters-row {
-    display: flex;
     gap: var(--spacing-md);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-light);
 }
 
-.filters-row select {
-    padding: 6px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+.page-header h2 {
+    font-size: 16px;
+    /* Smaller, bolder header based on screenshot */
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subtitle-count {
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.employee-count-badge {
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
-    background: var(--white);
+    background: rgba(0, 0, 0, 0.04);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+/* Action Toolbar */
+.action-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .search-field-container {
@@ -212,23 +160,37 @@
     border-color: var(--plum-deep);
 }
 
-.icon-btn.customize-btn {
+.btn-export,
+.btn-import {
+    font-size: 13px;
+    font-weight: 500;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+}
+
+.btn-import {
+    /* Screenshot shows "Import Time Entries" might be same style */
+}
+
+.icon-btn.filter-btn {
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background: transparent;
-    font-size: 1.2rem;
-    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--white);
     color: var(--text-secondary);
+    cursor: pointer;
 }
 
-.icon-btn.customize-btn:hover {
-    color: var(--plum-deep);
-    background: var(--hover-bg);
-    border-radius: var(--radius-sm);
+.icon-btn.filter-btn:hover {
+    background-color: var(--hover-bg);
 }
 
 /* Active Filters */
