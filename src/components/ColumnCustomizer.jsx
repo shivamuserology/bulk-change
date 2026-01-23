@@ -74,7 +74,7 @@ export default function ColumnCustomizer({ selectedColumns, onColumnsChange, onC
         <div className="modal-overlay" onClick={onClose}>
             <div className="column-customizer-modal" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Customize Columns</h3>
+                    <h3>Configure Attributes</h3>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
@@ -83,7 +83,7 @@ export default function ColumnCustomizer({ selectedColumns, onColumnsChange, onC
                         <input
                             type="text"
                             className="form-input"
-                            placeholder="Search fields..."
+                            placeholder="Search attributes..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

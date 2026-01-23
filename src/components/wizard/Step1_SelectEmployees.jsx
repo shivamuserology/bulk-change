@@ -189,6 +189,16 @@ export default function Step1_SelectEmployees() {
                         OR
                     </button>
                 </div>
+
+                <div className="filter-actions-group">
+                    <button
+                        className="icon-btn customize-columns-btn"
+                        onClick={() => setShowColumnCustomizer(true)}
+                        title="Attributes"
+                    >
+                        <span className="icon">⚙</span>
+                    </button>
+                </div>
             </div>
 
             <div className="selection-summary">
@@ -206,15 +216,6 @@ export default function Step1_SelectEmployees() {
             </div>
 
             <div className="table-container">
-                <div className="table-header-actions">
-                    <button
-                        className="customize-columns-btn"
-                        onClick={() => setShowColumnCustomizer(true)}
-                    >
-                        <span className="icon">⚙</span>
-                        View Fields
-                    </button>
-                </div>
                 <table className="table">
                     <thead>
                         <tr>
