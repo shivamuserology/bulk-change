@@ -2,6 +2,7 @@ import React from 'react';
 import { WizardProvider, useWizard, ENTRY_MODES } from './context/WizardContext';
 import ProgressHeader from './components/ProgressHeader';
 import DemoControlPanel from './components/DemoControlPanel';
+import ActionLogPanel from './components/ActionLogPanel';
 import Step1_SelectEmployees from './components/wizard/Step1_SelectEmployees';
 import Step2_ChooseAttributes from './components/wizard/Step2_ChooseAttributes';
 import Step3_SpecifyValues from './components/wizard/Step3_SpecifyValues';
@@ -16,8 +17,9 @@ import './App.css';
 import MainLayout from './components/layout/MainLayout';
 
 function WizardContent() {
-  const { currentStep, entryMode, importCSVComplete } = useWizard();
+  const { currentStep, entryMode, importCSVComplete, actionLogs } = useWizard();
   const [showCSVComplete, setShowCSVComplete] = React.useState(false);
+  const [isLogOpen, setIsLogOpen] = React.useState(false);
 
   // Show CSV complete modal if entry mode is CSV_COMPLETE
   React.useEffect(() => {
@@ -53,6 +55,18 @@ function WizardContent() {
         </div>
       </div>
       <DemoControlPanel />
+
+      {/* Action Log Toggle Button */}
+      <button
+        className={`floating-log-btn ${actionLogs.length > 0 ? 'has-logs' : ''}`}
+        onClick={() => setIsLogOpen(true)}
+        title="View Action Log"
+      >
+        <span className="btn-icon">📋</span>
+        {actionLogs.length > 0 && <span className="log-badge-count">{actionLogs.length}</span>}
+      </button>
+
+      <ActionLogPanel isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} />
 
       {showCSVComplete && (
         <CSVUploadModal

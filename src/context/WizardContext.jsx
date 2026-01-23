@@ -54,7 +54,10 @@ const initialState = {
 
     // Drafts
     drafts: [],
-    currentDraftId: null
+    currentDraftId: null,
+
+    // Action Logs
+    actionLogs: []
 };
 
 export function WizardProvider({ children }) {
@@ -75,6 +78,21 @@ export function WizardProvider({ children }) {
         // Mixed: use default but some are approval_required
         return field.defaultPermission;
     }, [state.permissionScenario]);
+
+    // Action Logs
+    const addActionLog = useCallback((type, title, details = {}) => {
+        const newLog = {
+            id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            timestamp: new Date().toISOString(),
+            type, // 'selection' | 'modification' | 'validation' | 'execution' | 'system'
+            title,
+            details
+        };
+        setState(prev => ({
+            ...prev,
+            actionLogs: [newLog, ...(prev.actionLogs || [])]
+        }));
+    }, []);
 
     // Navigation
     const goToStep = useCallback((step) => {
@@ -97,47 +115,82 @@ export function WizardProvider({ children }) {
 
     // Employee selection
     const selectEmployee = useCallback((employeeId) => {
-        setState(prev => ({
-            ...prev,
-            selectedEmployees: prev.selectedEmployees.includes(employeeId)
-                ? prev.selectedEmployees.filter(id => id !== employeeId)
-                : [...prev.selectedEmployees, employeeId]
-        }));
-    }, []);
+        const emp = employees.find(e => e.id === employeeId);
+        const name = emp ? `${emp.legalFirstName} ${emp.legalLastName}` : employeeId;
+
+        setState(prev => {
+            const isRemoving = prev.selectedEmployees.includes(employeeId);
+            addActionLog(
+                'selection',
+                isRemoving ? `Deselected ${name}` : `Selected ${name}`,
+                { employeeId, name, action: isRemoving ? 'remove' : 'add' }
+            );
+            return {
+                ...prev,
+                selectedEmployees: isRemoving
+                    ? prev.selectedEmployees.filter(id => id !== employeeId)
+                    : [...prev.selectedEmployees, employeeId]
+            };
+        });
+    }, [employees, addActionLog]);
 
     const selectAllEmployees = useCallback((employeeIds) => {
+        addActionLog('selection', `Selected all ${employeeIds.length} visible employees`, { count: employeeIds.length });
         setState(prev => ({
             ...prev,
             selectedEmployees: employeeIds
         }));
-    }, []);
+    }, [addActionLog]);
 
     const clearEmployees = useCallback(() => {
+        addActionLog('selection', 'Cleared all selections', {});
         setState(prev => ({
             ...prev,
             selectedEmployees: []
         }));
-    }, []);
+    }, [addActionLog]);
 
     // Field selection
     const selectField = useCallback((fieldId) => {
-        setState(prev => ({
-            ...prev,
-            selectedFields: prev.selectedFields.includes(fieldId)
-                ? prev.selectedFields.filter(id => id !== fieldId)
-                : [...prev.selectedFields, fieldId]
-        }));
-    }, []);
+        const field = fieldSchema.categories.flatMap(c => c.fields).find(f => f.id === fieldId);
+        const label = field ? field.label : fieldId;
+
+        setState(prev => {
+            const isRemoving = prev.selectedFields.includes(fieldId);
+            addActionLog(
+                'selection',
+                isRemoving ? `Removed attribute: ${label}` : `Added attribute: ${label}`,
+                { fieldId, label, action: isRemoving ? 'remove' : 'add' }
+            );
+            return {
+                ...prev,
+                selectedFields: isRemoving
+                    ? prev.selectedFields.filter(id => id !== fieldId)
+                    : [...prev.selectedFields, fieldId]
+            };
+        });
+    }, [fieldSchema, addActionLog]);
 
     const setSelectedFields = useCallback((fields) => {
+        addActionLog('selection', `Bulk updated attributes (${fields.length} total)`, { count: fields.length, fields });
         setState(prev => ({
             ...prev,
             selectedFields: fields
         }));
-    }, []);
+    }, [addActionLog]);
 
     // Field values
     const setFieldValue = useCallback((fieldId, valueConfig) => {
+        const field = fieldSchema.categories.flatMap(c => c.fields).find(f => f.id === fieldId);
+        const label = field ? field.label : fieldId;
+
+        addActionLog('modification', `Set value for ${label}`, {
+            fieldId,
+            label,
+            type: valueConfig.type,
+            value: valueConfig.value
+        });
+
         setState(prev => ({
             ...prev,
             fieldValues: {
@@ -145,41 +198,49 @@ export function WizardProvider({ children }) {
                 [fieldId]: valueConfig
             }
         }));
-    }, []);
+    }, [fieldSchema, addActionLog]);
 
     // Filter state
     const setFilters = useCallback((filters) => {
+        const activeFilterCount = Object.keys(filters).length;
+        if (activeFilterCount > 0) {
+            addActionLog('system', `Applied ${activeFilterCount} filters`, { filters });
+        }
         setState(prev => ({
             ...prev,
             filters
         }));
-    }, []);
+    }, [addActionLog]);
 
     // Effective date
     const setEffectiveDate = useCallback((dateType, customDate = null) => {
+        addActionLog('system', `Set effective date to ${dateType}`, { dateType, customDate });
         setState(prev => ({
             ...prev,
             effectiveDate: dateType,
             customDate
         }));
-    }, []);
+    }, [addActionLog]);
 
     // Demo controls
     const setPermissionScenario = useCallback((scenario) => {
+        addActionLog('system', `Switched permission scenario to ${scenario}`, { scenario });
         setState(prev => ({
             ...prev,
             permissionScenario: scenario
         }));
-    }, []);
+    }, [addActionLog]);
 
     const setOutcomeScenario = useCallback((scenario) => {
+        addActionLog('system', `Switched outcome scenario to ${scenario}`, { scenario });
         setState(prev => ({
             ...prev,
             outcomeScenario: scenario
         }));
-    }, []);
+    }, [addActionLog]);
 
     const setEntryMode = useCallback((mode) => {
+        addActionLog('system', `Switched entry mode to ${mode}`, { mode });
         setState(prev => ({
             ...prev,
             entryMode: mode,
@@ -187,7 +248,7 @@ export function WizardProvider({ children }) {
             currentStep: mode === ENTRY_MODES.CSV_COMPLETE ? 4 :
                 mode === ENTRY_MODES.CSV_EMPLOYEE_LIST ? 2 : 1
         }));
-    }, []);
+    }, [addActionLog]);
 
     // Validation
     const runValidation = useCallback(() => {
@@ -226,16 +287,24 @@ export function WizardProvider({ children }) {
             results.passedEmployees = selectedEmps;
         }
 
+        addActionLog('validation', `Validation complete: ${results.status.toUpperCase()}`, {
+            status: results.status,
+            errorCount: results.errors.length,
+            warningCount: results.warnings.length
+        });
+
         setState(prev => ({
             ...prev,
             validationResults: results
         }));
 
         return results;
-    }, [state.selectedEmployees, state.outcomeScenario, employees]);
+    }, [state.selectedEmployees, state.outcomeScenario, employees, addActionLog]);
 
     // Execution
     const executeChanges = useCallback(async () => {
+        addActionLog('execution', 'Execution started', { count: state.selectedEmployees.length });
+
         setState(prev => ({
             ...prev,
             executionStatus: { status: 'running', progress: 0, currentEmployee: null }
@@ -296,17 +365,20 @@ export function WizardProvider({ children }) {
             };
         }
 
+        addActionLog('execution', `Execution complete: ${finalStatus.status.toUpperCase()}`, finalStatus);
+
         setState(prev => ({
             ...prev,
             executionStatus: finalStatus
         }));
 
         return finalStatus;
-    }, [state.selectedEmployees, state.outcomeScenario]);
+    }, [state.selectedEmployees, state.outcomeScenario, addActionLog]);
 
     // Save draft
     const saveDraft = useCallback(() => {
         const draftId = `draft_${Date.now()}`;
+        addActionLog('system', 'Saved draft', { draftId });
         const draft = {
             id: draftId,
             savedAt: new Date().toISOString(),
@@ -324,10 +396,11 @@ export function WizardProvider({ children }) {
         }));
 
         return draftId;
-    }, [state]);
+    }, [state, addActionLog]);
 
     // Load draft
     const loadDraft = useCallback((draftId) => {
+        addActionLog('system', 'Loaded draft', { draftId });
         const draft = state.drafts.find(d => d.id === draftId);
         if (draft) {
             setState(prev => ({
@@ -340,21 +413,24 @@ export function WizardProvider({ children }) {
                 currentDraftId: draftId
             }));
         }
-    }, [state.drafts]);
+    }, [state.drafts, addActionLog]);
 
     // Reset wizard
     const resetWizard = useCallback(() => {
+        addActionLog('system', 'Reset Wizard', {});
         setState(prev => ({
             ...initialState,
             permissionScenario: prev.permissionScenario,
             outcomeScenario: prev.outcomeScenario,
             entryMode: prev.entryMode,
-            drafts: prev.drafts
+            drafts: prev.drafts,
+            actionLogs: prev.actionLogs // Keep logs across hard resets in prototype
         }));
-    }, []);
+    }, [addActionLog]);
 
     // CSV import simulation
     const importCSVEmployees = useCallback((employeeIds) => {
+        addActionLog('system', 'Imported employee list via CSV', { count: employeeIds.length });
         // Simulate CSV import with validation
         const validIds = employeeIds.filter(id => employees.find(e => e.id === id));
         const invalidIds = employeeIds.filter(id => !employees.find(e => e.id === id));
@@ -370,9 +446,10 @@ export function WizardProvider({ children }) {
             invalid: invalidIds.length,
             invalidIds
         };
-    }, [employees]);
+    }, [employees, addActionLog]);
 
     const importCSVComplete = useCallback((data) => {
+        addActionLog('system', 'Imported complete CSV template', { count: data.employeeIds.length });
         // Simulate full CSV import
         const { employeeIds, fields, values } = data;
 
@@ -383,7 +460,7 @@ export function WizardProvider({ children }) {
             fieldValues: values,
             currentStep: 4
         }));
-    }, []);
+    }, [addActionLog]);
 
     const value = {
         ...state,
@@ -391,6 +468,9 @@ export function WizardProvider({ children }) {
         fieldSchema,
         showDemoPanel,
         setShowDemoPanel,
+
+        // Action Logs
+        addActionLog,
 
         // Navigation
         goToStep,
