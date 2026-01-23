@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useWizard } from '../../context/WizardContext';
 import './Step3.css';
 
@@ -27,7 +27,7 @@ export default function Step3_SpecifyValues() {
         return fieldId;
     };
 
-    // Download Logic (same as Step 2)
+    // Download Logic
     const handleDownload = () => {
         if (!selectedEmployees.length) return;
 
@@ -50,12 +50,9 @@ export default function Step3_SpecifyValues() {
         URL.revokeObjectURL(url);
     };
 
-    const handleFileUpload = (e) => {
-        simulateUpload();
-    };
-
     const simulateUpload = () => {
         setUploadProgress(0);
+        setIsUploaded(false);
         const interval = setInterval(() => {
             setUploadProgress(prev => {
                 if (prev >= 100) {
@@ -63,9 +60,9 @@ export default function Step3_SpecifyValues() {
                     setIsUploaded(true);
                     return 100;
                 }
-                return prev + 20;
+                return prev + 25;
             });
-        }, 200);
+        }, 300);
     };
 
     const onDrop = (e) => {
@@ -75,176 +72,139 @@ export default function Step3_SpecifyValues() {
     };
 
     return (
-        <div className="step-container animate-fade-in">
-            <div className="step-header">
-                <div>
-                    <h2>Specify New Values</h2>
-                    <p className="step-description">
-                        Modify data offline and upload the completed CSV for validation.
-                    </p>
-                </div>
-            </div>
-
-            <div className="upload-download-content">
-                <div className="upload-download-container">
-
-                    {/* Step 1: Download */}
-                    <div className="revamp-section">
-                        <h3><span className="section-number">1</span> Download Current Data</h3>
-                        <div className="download-card">
-                            <div className="download-info">
-                                <h4>Pre-filled Template</h4>
-                                <p>Contains {selectedEmployees.length} employees and {selectedFields.length} selected attributes.</p>
-                            </div>
-                            <button className="btn btn-secondary" onClick={handleDownload}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                Download CSV Template
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Step 2: Upload */}
-                    <div className="revamp-section">
-                        <h3><span className="section-number">2</span> Upload Modified Data</h3>
-                        <div
-                            className={`upload-dropzone ${isDragging ? 'dragging' : ''} ${isUploaded ? 'success' : ''}`}
-                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                            onDragLeave={() => setIsDragging(false)}
-                            onDrop={onDrop}
-                            onClick={() => document.getElementById('csv-upload').click()}
-                        >
-                            <input
-                                type="file"
-                                id="csv-upload"
-                                hidden
-                                accept=".csv"
-                                onChange={handleFileUpload}
-                            />
-
-                            <div className="upload-icon">
-                                {isUploaded ? '✅' : '📤'}
-                            </div>
-
-                            <div className="upload-hint">
-                                {isUploaded ? (
-                                    <>
-                                        <h4>File Uploaded Successfully!</h4>
-                                        <p>Click or drag to replace the file.</p>
-                                    </>
-                                ) : uploadProgress > 0 ? (
-                                    <div style={{ width: '100%', maxWidth: '300px' }}>
-                                        <h4>Uploading... {uploadProgress}%</h4>
-                                        <div style={{ height: '4px', background: '#eee', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
-                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--plum-deep)', transition: 'width 0.2s' }}></div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <h4>Click or drag CSV file here to upload</h4>
-                                        <p>Only .csv files are supported. Max size 10MB.</p>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Instructions */}
-                    <div className="revamp-section">
-                        <h3>Pre-execution Checklist</h3>
-                        <div className="instructions-grid">
-                            <div className="instruction-card">
-                                <h5><span className="tip-icon">⚠️</span> Critical Rules</h5>
-                                <ul>
-                                    <li><strong>Maintain ID column:</strong> Do not change or remove the 'Employee ID' column.</li>
-                                    <li><strong>Header names:</strong> Keep the header row exactly as it is in the downloaded file.</li>
-                                    <li><strong>File format:</strong> Save your file as a .CSV (Comma Separated Values) only.</li>
-                                </ul>
-                            </div>
-                            <div className="instruction-card">
-                                <h5><span className="tip-icon">💡</span> Pro Tips</h5>
-                                <ul>
-                                    <li><strong>Empty Cells:</strong> Leave cells empty if you don't want to change that specific attribute for an employee.</li>
-                                    <li><strong>Date Formatting:</strong> Ensure all dates are in YYYY-MM-DD format to avoid validation errors.</li>
-                                    <li><strong>Validation:</strong> The next step will run a full validation on your data before committing.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Effective Date */}
-                    <div className="revamp-section">
-                        <h3><span className="section-number">3</span> Schedule Changes</h3>
-                        <div className="effective-date-section card">
-                            <div className="card-body">
-                                <div className="date-options">
-                                    <label className="date-option">
-                                        <input
-                                            type="radio"
-                                            name="effectiveDate"
-                                            checked={effectiveDate === 'immediate'}
-                                            onChange={() => setEffectiveDate('immediate')}
-                                        />
-                                        <div className="date-option-content">
-                                            <span className="date-option-title">Immediately</span>
-                                            <span className="date-option-desc">Changes apply upon execution</span>
-                                        </div>
-                                    </label>
-
-                                    <label className="date-option">
-                                        <input
-                                            type="radio"
-                                            name="effectiveDate"
-                                            checked={effectiveDate === 'next_pay_period'}
-                                            onChange={() => setEffectiveDate('next_pay_period')}
-                                        />
-                                        <div className="date-option-content">
-                                            <span className="date-option-title">Next Pay Period</span>
-                                            <span className="date-option-desc">February 1, 2026</span>
-                                        </div>
-                                    </label>
-
-                                    <label className="date-option">
-                                        <input
-                                            type="radio"
-                                            name="effectiveDate"
-                                            checked={effectiveDate === 'custom'}
-                                            onChange={() => setEffectiveDate('custom')}
-                                        />
-                                        <div className="date-option-content">
-                                            <span className="date-option-title">Specific Date</span>
-                                            {effectiveDate === 'custom' && (
-                                                <input
-                                                    type="date"
-                                                    className="form-input"
-                                                    style={{ marginTop: '8px' }}
-                                                    value={customDate || ''}
-                                                    onChange={(e) => setEffectiveDate('custom', e.target.value)}
-                                                />
-                                            )}
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div className="step-footer">
-                <button className="btn btn-secondary" onClick={prevStep}>
+        <div className="step3-container animate-fade-in">
+            {/* Top Navigation Row */}
+            <div className="step3-nav-header">
+                <button className="btn btn-secondary btn-sm" onClick={prevStep}>
                     ← Back
                 </button>
+                <button className="btn btn-ghost btn-sm" onClick={handleDownload} style={{ color: 'var(--plum-deep)', fontWeight: '600' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Template
+                </button>
+            </div>
+
+            {/* Title Area */}
+            <div className="step3-title-area">
+                <h2>Specify New Values</h2>
+                <p>Upload your modified data file to proceed with validation.</p>
+            </div>
+
+            {/* Central Content */}
+            <div className="step3-center-content">
+
+                {/* Hero Upload Area */}
+                <div className="upload-hero-container">
+                    <div
+                        className={`upload-dropzone-modern ${isDragging ? 'dragging' : ''} ${isUploaded ? 'is-uploaded' : ''}`}
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={onDrop}
+                        onClick={() => document.getElementById('modern-upload-input').click()}
+                    >
+                        <input
+                            type="file"
+                            id="modern-upload-input"
+                            hidden
+                            accept=".csv"
+                            onChange={simulateUpload}
+                        />
+
+                        <div className="modern-upload-icon">
+                            {isUploaded ? (
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            ) : (
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            )}
+                        </div>
+
+                        <div className="modern-upload-text">
+                            <h3>{isUploaded ? 'Data Uploaded Successfully' : 'Drop your modified CSV here'}</h3>
+                            <p>{isUploaded ? 'Your file has been processed and is ready for validation.' : 'or click to browse from your computer'}</p>
+                        </div>
+
+                        {!isUploaded && uploadProgress > 0 && (
+                            <div className="modern-progress-container">
+                                <div className="modern-progress-bar" style={{ width: `${uploadProgress}%` }}></div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Instructions Row */}
+                <div className="modern-instructions-row">
+                    <div className="instruction-tile">
+                        <div className="tile-icon">⚠️</div>
+                        <div className="tile-content">
+                            <h5>Keep Column Headers</h5>
+                            <p>Do not rename or remove any columns. We use the 'Employee ID' for mapping.</p>
+                        </div>
+                    </div>
+                    <div className="instruction-tile">
+                        <div className="tile-icon">💡</div>
+                        <div className="tile-content">
+                            <h5>Only Fill Changes</h5>
+                            <p>Leave cells empty for attributes you don't wish to modify.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Scheduling Section */}
+                <div className="schedule-minimal-container">
+                    <div className="schedule-header">
+                        <h4>Effective Date</h4>
+                    </div>
+                    <div className="minimal-date-grid">
+                        <label className={`minimal-date-card ${effectiveDate === 'immediate' ? 'active' : ''}`}>
+                            <input type="radio" name="eff-date" checked={effectiveDate === 'immediate'} onChange={() => setEffectiveDate('immediate')} />
+                            <span className="date-label">Immediate</span>
+                            <span className="date-subtext">Apply now</span>
+                        </label>
+                        <label className={`minimal-date-card ${effectiveDate === 'next_pay_period' ? 'active' : ''}`}>
+                            <input type="radio" name="eff-date" checked={effectiveDate === 'next_pay_period'} onChange={() => setEffectiveDate('next_pay_period')} />
+                            <span className="date-label">Next Period</span>
+                            <span className="date-subtext">Feb 1, 2026</span>
+                        </label>
+                        <label className={`minimal-date-card ${effectiveDate === 'custom' ? 'active' : ''}`}>
+                            <input type="radio" name="eff-date" checked={effectiveDate === 'custom'} onChange={() => setEffectiveDate('custom')} />
+                            <span className="date-label">Custom Date</span>
+                            <span className="date-subtext">{customDate || 'Select...'}</span>
+                        </label>
+                    </div>
+
+                    {effectiveDate === 'custom' && (
+                        <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'center' }}>
+                            <input
+                                type="date"
+                                className="form-input"
+                                style={{ maxWidth: '200px' }}
+                                value={customDate || ''}
+                                onChange={(e) => setEffectiveDate('custom', e.target.value)}
+                            />
+                        </div>
+                    )}
+                </div>
+
+            </div>
+
+            {/* Footer Action */}
+            <div className="step3-footer">
                 <button
-                    className="btn btn-primary btn-lg"
+                    className="btn-premium"
                     disabled={!isUploaded}
                     onClick={nextStep}
                 >
-                    Continue to Validation →
+                    Continue to Validation
                 </button>
             </div>
         </div>
