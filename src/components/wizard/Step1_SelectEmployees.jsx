@@ -46,15 +46,14 @@ export default function Step1_SelectEmployees() {
             return;
         }
 
-        setFilters(prev => {
-            const newFilters = { ...prev };
-            if (!value || (Array.isArray(value) && value.length === 0)) {
-                delete newFilters[fieldId];
-            } else {
-                newFilters[fieldId] = value;
-            }
-            return newFilters;
-        });
+        const newFilters = { ...filters };
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+            delete newFilters[fieldId];
+        } else {
+            newFilters[fieldId] = value;
+        }
+
+        setFilters(newFilters);
     };
 
     // Filter employees
