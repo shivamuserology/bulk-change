@@ -406,3 +406,87 @@
     border: 1px dashed var(--border-color);
     margin-top: var(--spacing-lg);
 }
+
+/* Active Filters */
+.active-filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    animation: slideDown 0.3s ease-out;
+}
+
+.filter-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 4px 8px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.filter-chip:hover {
+    border-color: var(--plum-light);
+    box-shadow: var(--shadow-md);
+}
+
+.chip-field-name {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.chip-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.chip-remove-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--danger);
+}
+
+.clear-all-filters-btn {
+    font-size: var(--font-size-sm);
+    color: var(--plum-deep);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px 8px;
+    transition: color var(--transition-fast);
+}
+
+.clear-all-filters-btn:hover {
+    color: var(--plum-dark);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
