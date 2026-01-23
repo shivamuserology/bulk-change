@@ -126,6 +126,57 @@ export default function Step1_SelectEmployees() {
         .map(colId => getColumnConfig(colId))
         .filter(Boolean);
 
+    // Helper to get field label
+    const getFieldLabel = (fieldId) => {
+        for (const category of fieldSchema.categories) {
+            const field = category.fields.find(f => f.id === fieldId);
+            if (field) return field.label;
+        }
+        return fieldId;
+    };
+
+    const removeFilterValue = (fieldId, value) => {
+        const currentValues = filters[fieldId] || [];
+        const newValues = currentValues.filter(v => v !== value);
+        handleFilterChange(fieldId, newValues);
+    };
+
+    const renderActiveFilters = () => {
+        const activeKeys = Object.keys(filters);
+        if (activeKeys.length === 0) return null;
+
+        return (
+            <div className="active-filters-container animate-slide-down">
+                {activeKeys.map(fieldId => {
+                    const values = filters[fieldId];
+                    if (!values || values.length === 0) return null;
+                    const label = getFieldLabel(fieldId);
+
+                    return values.map(value => (
+                        <div key={`${fieldId}-${value}`} className="filter-chip">
+                            <span className="chip-label">
+                                <span className="chip-field-name">{label}:</span> {value}
+                            </span>
+                            <button
+                                className="chip-remove-btn"
+                                onClick={() => removeFilterValue(fieldId, value)}
+                                title="Remove filter"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ));
+                })}
+                <button
+                    className="clear-all-filters-btn"
+                    onClick={() => handleFilterChange(null, 'RESET')}
+                >
+                    Clear All
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div className="dashboard-view animate-fade-in">
             <div className="view-content-wrapper">
@@ -214,6 +265,7 @@ export default function Step1_SelectEmployees() {
                                 </button>
                             </div>
                         </div>
+                        {renderActiveFilters()}
                     </div>
 
                     {csvResult && (
@@ -235,6 +287,9 @@ export default function Step1_SelectEmployees() {
                                     <div className="selection-actions">
                                         <button className="btn btn-primary btn-sm" onClick={nextStep}>
                                             Bulk Change →
+                                        </button>
+                                        <button className="btn btn-secondary-inverse btn-sm">
+                                            Download
                                         </button>
                                         <button className="btn btn-ghost btn-sm" onClick={clearEmployees}>
                                             Clear
