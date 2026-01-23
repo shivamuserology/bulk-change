@@ -190,3 +190,44 @@
         width: 100%;
     }
 }
+
+/* CSV Upload Prompt */
+.csv-upload-prompt {
+    border: 2px solid var(--plum-light);
+    background: linear-gradient(to right, #ffffff, #fdf4ff);
+    margin-bottom: var(--spacing-lg);
+}
+
+.csv-icon-circle {
+    width: 48px;
+    height: 48px;
+    background: var(--plum-light-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--plum-deep);
+}
+
+.separator-with-text {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: var(--spacing-xl) 0;
+}
+
+.separator-with-text::before,
+.separator-with-text::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.separator-with-text span {
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}

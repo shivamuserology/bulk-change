@@ -186,17 +186,39 @@ export default function Step2_ChooseAttributes() {
                 />
             </div>
 
+            <div className="ready-to-download-section">
+                <div className="download-summary-card">
+                    <div className="download-summary-info">
+                        <strong>Ready to download:</strong>
+                        <span>{selectedEmployees.length} employees with {selectedFields.length} attributes</span>
+                    </div>
+                </div>
+            </div>
+
             <div className="step-footer">
                 <button className="btn btn-secondary" onClick={prevStep}>
                     ← Back
                 </button>
-                <button
-                    className="btn btn-primary btn-lg"
-                    disabled={selectedFields.length === 0}
-                    onClick={nextStep}
-                >
-                    Continue with {selectedFields.length} field{selectedFields.length !== 1 ? 's' : ''} →
-                </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button className="btn btn-ghost" onClick={nextStep}>
+                        Continue with Manual Entry
+                    </button>
+                    <button
+                        className="btn btn-primary btn-lg download-continue-btn"
+                        disabled={selectedFields.length === 0}
+                        onClick={() => {
+                            handleDownloadPreview();
+                            nextStep();
+                        }}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download & Continue →
+                    </button>
+                </div>
             </div>
         </div>
     );

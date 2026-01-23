@@ -157,14 +157,36 @@ export default function Step3_SpecifyValues() {
                         Define new values for {selectedFields.length} fields across {selectedEmployees.length} employees
                     </p>
                 </div>
-                <div className="step-actions">
+            </div>
+
+            {/* Offline Edit Path (CSV Upload) */}
+            <div className="csv-upload-prompt card">
+                <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-lg)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="csv-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="12"></line>
+                                <polyline points="9 15 12 18 15 15"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 style={{ margin: 0, fontSize: '16px' }}>Uploaded Edited File?</h4>
+                            <p style={{ margin: 0, fontSize: '13px', opacity: 0.7 }}>If you edited your downloaded template, upload it here to import all values at once.</p>
+                        </div>
+                    </div>
                     <button
-                        className="btn btn-secondary"
+                        className="btn btn-primary"
                         onClick={() => setShowCSVModal(true)}
                     >
-                        📥 Download / Upload CSV
+                        Upload Edited CSV
                     </button>
                 </div>
+            </div>
+
+            <div className="separator-with-text">
+                <span>OR MANUAL ENTRY</span>
             </div>
 
             {/* Value Input Mode Tabs */}
